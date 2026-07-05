@@ -169,7 +169,6 @@
 #define mlk_memset memset
 #endif
 
-
 /* Allocation macros for large local structures
  *
  * MLK_ALLOC(v, T, N) declares T *v and attempts to point it to an T[N]
@@ -201,6 +200,10 @@
   (arg0, arg1, arg2, context)
 #define MLK_CONTEXT_PARAMETERS_4(arg0, arg1, arg2, arg3, context) \
   (arg0, arg1, arg2, arg3, context)
+#define MLK_CONTEXT_PARAMETERS_6(arg0, arg1, arg2, arg3, arg4, arg5, context) \
+  (arg0, arg1, arg2, arg3, arg4, arg5, context)
+#define MLK_CONTEXT_PARAMETERS_9(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, context) \
+  (arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, context)
 #else /* MLK_CONFIG_CONTEXT_PARAMETER */
 #define MLK_CONTEXT_PARAMETERS_0(context) ()
 #define MLK_CONTEXT_PARAMETERS_1(arg0, context) (arg0)
@@ -208,6 +211,12 @@
 #define MLK_CONTEXT_PARAMETERS_3(arg0, arg1, arg2, context) (arg0, arg1, arg2)
 #define MLK_CONTEXT_PARAMETERS_4(arg0, arg1, arg2, arg3, context) \
   (arg0, arg1, arg2, arg3)
+#define MLK_CONTEXT_PARAMETERS_5(arg0, arg1, arg2, arg3, arg4, context) \
+  (arg0, arg1, arg2, arg3, arg4)
+#define MLK_CONTEXT_PARAMETERS_6(arg0, arg1, arg2, arg3, arg4, arg5, context) \
+  (arg0, arg1, arg2, arg3, arg4, arg5)
+#define MLK_CONTEXT_PARAMETERS_9(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, context) \
+  (arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
 #endif /* !MLK_CONFIG_CONTEXT_PARAMETER */
 
 #if defined(MLK_CONFIG_CONTEXT_PARAMETER_TYPE) != \

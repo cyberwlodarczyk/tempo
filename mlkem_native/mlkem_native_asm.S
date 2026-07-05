@@ -225,6 +225,8 @@
 #undef MLK_CONTEXT_PARAMETERS_2
 #undef MLK_CONTEXT_PARAMETERS_3
 #undef MLK_CONTEXT_PARAMETERS_4
+#undef MLK_CONTEXT_PARAMETERS_6
+#undef MLK_CONTEXT_PARAMETERS_9
 #undef MLK_EMPTY_CU
 #undef MLK_ERR_FAIL
 #undef MLK_ERR_OUT_OF_MEMORY
@@ -255,6 +257,14 @@
 #undef mlk_kem_enc_derand
 #undef mlk_kem_keypair
 #undef mlk_kem_keypair_derand
+/* mlkem/src/tempo.h */
+#undef MLK_TEMPO_H
+#undef mlk_tempo_session
+#undef mlk_tempo_keygen
+#undef mlk_tempo_encaps
+#undef mlk_tempo_decaps
+#undef mlk_tempo_confirm
+#undef mlk_tempo_verify
 /* mlkem/src/params.h */
 #undef MLKEM_DU
 #undef MLKEM_DV
@@ -282,6 +292,13 @@
 #undef MLKEM_Q_HALF
 #undef MLKEM_SSBYTES
 #undef MLKEM_SYMBYTES
+#undef MLKEM_TEMPO_LAMBDA
+#undef MLKEM_TEMPO_3LAMBDA
+#undef MLKEM_TEMPO_TAGBYTES
+#undef MLKEM_TEMPO_APKBYTES
+#undef MLKEM_TEMPO_SSBYTES
+#undef MLKEM_TEMPO_SIDBYTES
+#undef MLKEM_TEMPO_PWDBYTES
 #undef MLKEM_UINT12_LIMIT
 #undef MLK_PARAMS_H
 /* mlkem/src/poly_k.h */
@@ -297,6 +314,7 @@
 #undef mlk_polymat
 #undef mlk_polyvec
 #undef mlk_polyvec_add
+#undef mlk_polyvec_sub
 #undef mlk_polyvec_basemul_acc_montgomery_cached
 #undef mlk_polyvec_compress_du
 #undef mlk_polyvec_decompress_du

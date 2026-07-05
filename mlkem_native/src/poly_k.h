@@ -508,6 +508,21 @@ __contract__(
   assigns(memory_slice(r, sizeof(mlk_polyvec)))
 );
 
+#define mlk_polyvec_sub MLK_NAMESPACE_K(polyvec_sub)
+MLK_INTERNAL_API
+void mlk_polyvec_sub(mlk_polyvec *r, const mlk_polyvec *b)
+__contract__(
+  requires(memory_no_alias(r, sizeof(mlk_polyvec)))
+  requires(memory_no_alias(b, sizeof(mlk_polyvec)))
+  requires(forall(j0, 0, MLKEM_K,
+          forall(k0, 0, MLKEM_N,
+            (int32_t)r->vec[j0].coeffs[k0] + b->vec[j0].coeffs[k0] <= INT16_MAX)))
+  requires(forall(j1, 0, MLKEM_K,
+          forall(k1, 0, MLKEM_N,
+            (int32_t)r->vec[j1].coeffs[k1] + b->vec[j1].coeffs[k1] >= INT16_MIN)))
+  assigns(memory_slice(r, sizeof(mlk_polyvec)))
+);
+
 #define mlk_polyvec_tomont MLK_NAMESPACE_K(polyvec_tomont)
 /*************************************************
  * Name:        mlk_polyvec_tomont

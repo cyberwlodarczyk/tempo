@@ -278,6 +278,29 @@ void mlk_polyvec_add(mlk_polyvec *r, const mlk_polyvec *b)
   }
 }
 
+MLK_INTERNAL_API
+void mlk_polyvec_sub(mlk_polyvec *r, const mlk_polyvec *b)
+{
+  unsigned i;
+  for (i = 0; i < MLKEM_K; i++)
+  __loop__(
+    assigns(i, memory_slice(r, sizeof(mlk_polyvec)))
+    invariant(i <= MLKEM_K)
+    invariant(forall(j0, i, MLKEM_K,
+                forall(k0, 0, MLKEM_N,
+                       ((int32_t)r->vec[j0].coeffs[k0] + b->vec[j0].coeffs[k0] <= INT16_MAX) &&
+                       ((int32_t)r->vec[j0].coeffs[k0] + b->vec[j0].coeffs[k0] >= INT16_MIN))))
+    invariant(forall(j2, 0, i,
+                forall(k2, 0, MLKEM_N,
+                       (r->vec[j2].coeffs[k2] <= INT16_MAX) &&
+                       (r->vec[j2].coeffs[k2] >= INT16_MIN))))
+    decreases(MLKEM_K - i)
+  )
+  {
+    mlk_poly_sub(&r->vec[i], &b->vec[i]);
+  }
+}
+
 /* Reference: `polyvec_tomont()` in the reference implementation @[REF]. */
 MLK_INTERNAL_API
 void mlk_polyvec_tomont(mlk_polyvec *r)
