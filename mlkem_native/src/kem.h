@@ -46,15 +46,13 @@
 
 #endif /* MLK_CHECK_APIS */
 
-#define mlk_kem_keypair_derand    \
-  MLK_NAMESPACE_K(keypair_derand) \
-  MLK_CONTEXT_PARAMETERS_3
-#define mlk_kem_keypair MLK_NAMESPACE_K(keypair) MLK_CONTEXT_PARAMETERS_2
-#define mlk_kem_enc_derand MLK_NAMESPACE_K(enc_derand) MLK_CONTEXT_PARAMETERS_4
-#define mlk_kem_enc MLK_NAMESPACE_K(enc) MLK_CONTEXT_PARAMETERS_3
-#define mlk_kem_dec MLK_NAMESPACE_K(dec) MLK_CONTEXT_PARAMETERS_3
-#define mlk_kem_check_pk MLK_NAMESPACE_K(check_pk) MLK_CONTEXT_PARAMETERS_1
-#define mlk_kem_check_sk MLK_NAMESPACE_K(check_sk) MLK_CONTEXT_PARAMETERS_1
+#define mlk_kem_keypair_derand MLK_NAMESPACE_K(keypair_derand)
+#define mlk_kem_keypair MLK_NAMESPACE_K(keypair)
+#define mlk_kem_enc_derand MLK_NAMESPACE_K(enc_derand)
+#define mlk_kem_enc MLK_NAMESPACE_K(enc)
+#define mlk_kem_dec MLK_NAMESPACE_K(dec)
+#define mlk_kem_check_pk MLK_NAMESPACE_K(check_pk)
+#define mlk_kem_check_sk MLK_NAMESPACE_K(check_sk)
 
 /*************************************************
  * Name:        mlk_kem_check_pk
@@ -68,8 +66,6 @@
  *
  * Returns: - 0 on success
  *          - MLK_ERR_FAIL: If the modulus check failed.
- *          - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
- *              used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
  *
  * Specification: Implements @[FIPS203, Section 7.2, 'modulus check']
  *
@@ -78,12 +74,10 @@
 /* Reference: Not implemented in the reference implementation @[REF]. */
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int mlk_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+int mlk_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
     __contract__(
         requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
-            ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
-                    return_value == MLK_ERR_OUT_OF_MEMORY));
+            ensures(return_value == 0 || return_value == MLK_ERR_FAIL));
 
 /*************************************************
  * Name:        mlk_kem_check_sk
@@ -98,8 +92,6 @@ int mlk_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
  *
  * Returns: - 0 on success
  *          - MLK_ERR_FAIL: If the public key hash check failed.
- *          - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
- *              used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
  *
  * Specification: Implements @[FIPS203, Section 7.3, 'hash check']
  *
@@ -108,12 +100,10 @@ int mlk_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
 /* Reference: Not implemented in the reference implementation @[REF]. */
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int mlk_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
-                     MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+int mlk_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
     __contract__(
         requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
-            ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
-                    return_value == MLK_ERR_OUT_OF_MEMORY));
+            ensures(return_value == 0 || return_value == MLK_ERR_FAIL));
 
 /*************************************************
  * Name:        mlk_kem_keypair_derand
@@ -134,8 +124,6 @@ int mlk_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
  * Returns:     - 0: On success
  *              - MLK_ERR_FAIL: If MLK_CONFIG_KEYGEN_PCT is enabled and the
  *                  PCT failed.
- *              - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
- *                  used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
  *
  * Specification: Implements @[FIPS203, Algorithm 16, ML-KEM.KeyGen_Internal]
  *
@@ -144,14 +132,12 @@ MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int mlk_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
                            uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
-                           const uint8_t coins[2 * MLKEM_SYMBYTES],
-                           MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+                           const uint8_t coins[2 * MLKEM_SYMBYTES])
     __contract__(
         requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES)) requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES)) requires(memory_no_alias(coins, 2 * MLKEM_SYMBYTES))
             assigns(memory_slice(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
                 assigns(memory_slice(sk, MLKEM_INDCCA_SECRETKEYBYTES))
                     ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
-                            return_value == MLK_ERR_OUT_OF_MEMORY ||
                             return_value == MLK_ERR_RNG_FAIL));
 
 /*************************************************
@@ -168,8 +154,6 @@ int mlk_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
  *                 bytes)
  *
  * Returns:     - 0: On success
- *              - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
- *                  used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
  *              - MLK_ERR_RNG_FAIL: Random number generation failed.
  *              - MLK_ERR_FAIL: If MLK_CONFIG_KEYGEN_PCT is enabled and the
  *                  PCT failed.
@@ -179,14 +163,12 @@ int mlk_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
  **************************************************/
 MLK_EXTERNAL_API
 int mlk_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                    uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
-                    MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+                    uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
     __contract__(
         requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES)) requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
             assigns(memory_slice(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
                 assigns(memory_slice(sk, MLKEM_INDCCA_SECRETKEYBYTES))
                     ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
-                            return_value == MLK_ERR_OUT_OF_MEMORY ||
                             return_value == MLK_ERR_RNG_FAIL));
 
 /*************************************************
@@ -210,8 +192,6 @@ int mlk_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
  * Returns: - 0 on success
  *          - MLK_ERR_FAIL: If the 'modulus check' @[FIPS203, Section 7.2]
  *              for the public key fails.
- *          - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
- *              used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
  *
  * Specification: Implements @[FIPS203, Algorithm 17, ML-KEM.Encaps_Internal]
  *
@@ -221,14 +201,12 @@ MLK_MUST_CHECK_RETURN_VALUE
 int mlk_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
                        uint8_t ss[MLKEM_SSBYTES],
                        const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                       const uint8_t coins[MLKEM_SYMBYTES],
-                       MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+                       const uint8_t coins[MLKEM_SYMBYTES])
     __contract__(
         requires(memory_no_alias(ct, MLKEM_INDCCA_CIPHERTEXTBYTES)) requires(memory_no_alias(ss, MLKEM_SSBYTES)) requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES)) requires(memory_no_alias(coins, MLKEM_SYMBYTES))
             assigns(memory_slice(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
                 assigns(memory_slice(ss, MLKEM_SSBYTES))
-                    ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
-                            return_value == MLK_ERR_OUT_OF_MEMORY));
+                    ensures(return_value == 0 || return_value == MLK_ERR_FAIL));
 
 /*************************************************
  * Name:        mlk_kem_enc
@@ -246,8 +224,6 @@ int mlk_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
  *                 bytes)
  *
  * Returns: - 0 on success
- *          - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
- *              used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
  *          - MLK_ERR_RNG_FAIL: Random number generation failed.
  *          - MLK_ERR_FAIL: If the 'modulus check' @[FIPS203, Section 7.2]
  *              for the public key fails.
@@ -258,14 +234,12 @@ int mlk_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
 MLK_EXTERNAL_API
 int mlk_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
                 uint8_t ss[MLKEM_SSBYTES],
-                const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+                const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
     __contract__(
         requires(memory_no_alias(ct, MLKEM_INDCCA_CIPHERTEXTBYTES)) requires(memory_no_alias(ss, MLKEM_SSBYTES)) requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
             assigns(memory_slice(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
                 assigns(memory_slice(ss, MLKEM_SSBYTES))
                     ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
-                            return_value == MLK_ERR_OUT_OF_MEMORY ||
                             return_value == MLK_ERR_RNG_FAIL));
 
 /*************************************************
@@ -286,8 +260,6 @@ int mlk_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
  * Returns: - 0 on success
  *          - MLK_ERR_FAIL: If the 'hash check' @[FIPS203, Section 7.3]
  *              for the secret key fails.
- *          - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
- *              used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
  *
  * Specification: Implements @[FIPS203, Algorithm 21, ML-KEM.Decaps]
  *
@@ -295,12 +267,10 @@ int mlk_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
 MLK_EXTERNAL_API
 int mlk_kem_dec(uint8_t ss[MLKEM_SSBYTES],
                 const uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
-                const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
-                MLK_CONFIG_CONTEXT_PARAMETER_TYPE context)
+                const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
     __contract__(
         requires(memory_no_alias(ss, MLKEM_SSBYTES)) requires(memory_no_alias(ct, MLKEM_INDCCA_CIPHERTEXTBYTES)) requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
             assigns(memory_slice(ss, MLKEM_SSBYTES))
-                ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
-                        return_value == MLK_ERR_OUT_OF_MEMORY));
+                ensures(return_value == 0 || return_value == MLK_ERR_FAIL));
 
 #endif /* !MLK_KEM_H */

@@ -133,9 +133,6 @@
 
 /* Generic failure condition */
 #define MLK_ERR_FAIL -1
-/* An allocation failed. This can only happen if MLK_CONFIG_CUSTOM_ALLOC_FREE
- * is defined and the provided MLK_CUSTOM_ALLOC can fail. */
-#define MLK_ERR_OUT_OF_MEMORY -2
 /* An rng failure occured. Might be due to insufficient entropy or
  * system misconfiguration. */
 #define MLK_ERR_RNG_FAIL -3
@@ -227,8 +224,6 @@ extern "C"
      * Returns:     - 0: On success
      *              - MLK_ERR_FAIL: If MLK_CONFIG_KEYGEN_PCT is enabled and the
      *                  PCT failed.
-     *              - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
-     *                  used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
      *
      * Specification: Implements @[FIPS203, Algorithm 16, ML-KEM.KeyGen_Internal]
      *
@@ -238,12 +233,7 @@ extern "C"
     int MLK_API_NAMESPACE(keypair_derand)(
         uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
         uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-        const uint8_t coins[2 * MLKEM_SYMBYTES]
-#ifdef MLK_CONFIG_CONTEXT_PARAMETER
-        ,
-        MLK_CONFIG_CONTEXT_PARAMETER_TYPE context
-#endif
-    );
+        const uint8_t coins[2 * MLKEM_SYMBYTES]);
 
 #if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
     /*************************************************
@@ -260,8 +250,6 @@ extern "C"
      * Returns:     - 0: On success
      *              - MLK_ERR_FAIL: If MLK_CONFIG_KEYGEN_PCT is enabled and the
      *                  PCT failed.
-     *              - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
-     *                  used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
      *              - MLK_ERR_RNG_FAIL: Random number generation failed.
      *
      * Specification: Implements @[FIPS203, Algorithm 19, ML-KEM.KeyGen]
@@ -271,12 +259,7 @@ extern "C"
     MLK_API_MUST_CHECK_RETURN_VALUE
     int MLK_API_NAMESPACE(keypair)(
         uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-        uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]
-#ifdef MLK_CONFIG_CONTEXT_PARAMETER
-        ,
-        MLK_CONFIG_CONTEXT_PARAMETER_TYPE context
-#endif
-    );
+        uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
 #endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
 
     /*************************************************
@@ -297,8 +280,6 @@ extern "C"
      * Returns: - 0 on success
      *          - MLK_ERR_FAIL: If the 'modulus check' @[FIPS203, Section 7.2]
      *              for the public key fails.
-     *          - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
-     *              used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
      *
      * Specification: Implements @[FIPS203, Algorithm 17, ML-KEM.Encaps_Internal]
      *
@@ -309,12 +290,7 @@ extern "C"
         uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_CONFIG_API_PARAMETER_SET)],
         uint8_t ss[MLKEM_BYTES],
         const uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-        const uint8_t coins[MLKEM_SYMBYTES]
-#ifdef MLK_CONFIG_CONTEXT_PARAMETER
-        ,
-        MLK_CONFIG_CONTEXT_PARAMETER_TYPE context
-#endif
-    );
+        const uint8_t coins[MLKEM_SYMBYTES]);
 
 #if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
     /*************************************************
@@ -333,8 +309,6 @@ extern "C"
      * Returns: - 0 on success
      *          - MLK_ERR_FAIL: If the 'modulus check' @[FIPS203, Section 7.2]
      *              for the public key fails.
-     *          - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
-     *              used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
      *          - MLK_ERR_RNG_FAIL: Random number generation failed.
      *
      * Specification: Implements @[FIPS203, Algorithm 20, ML-KEM.Encaps]
@@ -345,12 +319,7 @@ extern "C"
     int MLK_API_NAMESPACE(enc)(
         uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_CONFIG_API_PARAMETER_SET)],
         uint8_t ss[MLKEM_BYTES],
-        const uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]
-#ifdef MLK_CONFIG_CONTEXT_PARAMETER
-        ,
-        MLK_CONFIG_CONTEXT_PARAMETER_TYPE context
-#endif
-    );
+        const uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
 #endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
 
     /*************************************************
@@ -369,8 +338,6 @@ extern "C"
      * Returns: - 0 on success
      *          - MLK_ERR_FAIL: If the 'hash check' @[FIPS203, Section 7.3]
      *              for the secret key fails.
-     *          - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
-     *              used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
      *
      * Specification: Implements @[FIPS203, Algorithm 21, ML-KEM.Decaps]
      *
@@ -380,12 +347,7 @@ extern "C"
     int MLK_API_NAMESPACE(dec)(
         uint8_t ss[MLKEM_BYTES],
         const uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-        const uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]
-#ifdef MLK_CONFIG_CONTEXT_PARAMETER
-        ,
-        MLK_CONFIG_CONTEXT_PARAMETER_TYPE context
-#endif
-    );
+        const uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
 
     /*************************************************
      * Name:        crypto_kem_check_pk
@@ -398,8 +360,6 @@ extern "C"
      *
      * Returns: - 0 on success
      *          - MLK_ERR_FAIL: If the modulus check failed.
-     *          - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
-     *              used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
      *
      * Specification: Implements @[FIPS203, Section 7.2, 'modulus check']
      *
@@ -407,12 +367,7 @@ extern "C"
     MLK_API_QUALIFIER
     MLK_API_MUST_CHECK_RETURN_VALUE
     int MLK_API_NAMESPACE(check_pk)(
-        const uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]
-#ifdef MLK_CONFIG_CONTEXT_PARAMETER
-        ,
-        MLK_CONFIG_CONTEXT_PARAMETER_TYPE context
-#endif
-    );
+        const uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
 
     /*************************************************
      * Name:        crypto_kem_check_sk
@@ -426,8 +381,6 @@ extern "C"
      *
      * Returns: - 0 on success
      *          - MLK_ERR_FAIL: If the public key hash check failed.
-     *          - MLK_ERR_OUT_OF_MEMORY: If MLK_CONFIG_CUSTOM_ALLOC_FREE is
-     *              used and an allocation via MLK_CUSTOM_ALLOC returned NULL.
      *
      * Specification: Implements @[FIPS203, Section 7.3, 'hash check']
      *
@@ -435,12 +388,7 @@ extern "C"
     MLK_API_QUALIFIER
     MLK_API_MUST_CHECK_RETURN_VALUE
     int MLK_API_NAMESPACE(check_sk)(
-        const uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]
-#ifdef MLK_CONFIG_CONTEXT_PARAMETER
-        ,
-        MLK_CONFIG_CONTEXT_PARAMETER_TYPE context
-#endif
-    );
+        const uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
 
     MLK_API_QUALIFIER
     void MLK_API_NAMESPACE(tempo_keygen)(
@@ -448,12 +396,7 @@ extern "C"
         uint8_t secret_key[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
         uint8_t apk[MLKEM_TEMPO_APKBYTES(MLK_CONFIG_API_PARAMETER_SET)],
         const uint8_t sid[MLKEM_TEMPO_SIDBYTES],
-        const uint8_t pwd[MLKEM_TEMPO_PWDBYTES]
-#ifdef MLK_CONFIG_CONTEXT_PARAMETER
-        ,
-        MLK_CONFIG_CONTEXT_PARAMETER_TYPE context
-#endif
-    );
+        const uint8_t pwd[MLKEM_TEMPO_PWDBYTES]);
 
     MLK_API_QUALIFIER
     void MLK_API_NAMESPACE(tempo_encaps)(
@@ -462,23 +405,13 @@ extern "C"
         uint8_t ephemeral_key[MLKEM_BYTES],
         const uint8_t sid[MLKEM_TEMPO_SIDBYTES],
         const uint8_t pwd[MLKEM_TEMPO_PWDBYTES],
-        const uint8_t apk[MLKEM_TEMPO_APKBYTES(MLK_CONFIG_API_PARAMETER_SET)]
-#ifdef MLK_CONFIG_CONTEXT_PARAMETER
-        ,
-        MLK_CONFIG_CONTEXT_PARAMETER_TYPE context
-#endif
-    );
+        const uint8_t apk[MLKEM_TEMPO_APKBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
 
     MLK_API_QUALIFIER
     void MLK_API_NAMESPACE(tempo_decaps)(
         uint8_t ephemeral_key[MLKEM_BYTES],
         const uint8_t secret_key[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-        const uint8_t ciphertext[MLKEM_CIPHERTEXTBYTES(MLK_CONFIG_API_PARAMETER_SET)]
-#ifdef MLK_CONFIG_CONTEXT_PARAMETER
-        ,
-        MLK_CONFIG_CONTEXT_PARAMETER_TYPE context
-#endif
-    );
+        const uint8_t ciphertext[MLKEM_CIPHERTEXTBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
 
     MLK_API_QUALIFIER
     void MLK_API_NAMESPACE(tempo_confirm)(
@@ -490,12 +423,7 @@ extern "C"
         const uint8_t apk[MLKEM_TEMPO_APKBYTES(MLK_CONFIG_API_PARAMETER_SET)],
         const uint8_t ciphertext[MLKEM_CIPHERTEXTBYTES(MLK_CONFIG_API_PARAMETER_SET)],
         const uint8_t public_key[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-        const uint8_t ephemeral_key[MLKEM_BYTES],
-#ifdef MLK_CONFIG_CONTEXT_PARAMETER
-        ,
-        MLK_CONFIG_CONTEXT_PARAMETER_TYPE context
-#endif
-    );
+        const uint8_t ephemeral_key[MLKEM_BYTES], );
 
     MLK_API_QUALIFIER
     MLK_API_MUST_CHECK_RETURN_VALUE
