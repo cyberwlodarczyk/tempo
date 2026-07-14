@@ -95,6 +95,8 @@
  *****************************************************************************/
 #define MLK_CONFIG_NAMESPACE_PREFIX mlkem
 
+#define MLK_CONFIG_TEMPO_NAMESPACE_PREFIX tempo
+
 /******************************************************************************
  * Name:        MLK_CONFIG_MULTILEVEL_BUILD
  *
@@ -129,7 +131,7 @@
  *              even mlkem-native's public API can be marked `static`.
  *
  *****************************************************************************/
-#define MLK_CONFIG_EXTERNAL_API_QUALIFIER static
+// #define MLK_CONFIG_EXTERNAL_API_QUALIFIER static
 
 /******************************************************************************
  * Name:        MLK_CONFIG_NO_RANDOMIZED_API
@@ -165,7 +167,7 @@
 /******************************************************************************
  * Name:        MLK_CONFIG_CONSTANTS_ONLY
  *
- * Description: If you only need the size constants (MLKEM_PUBLICKEYBYTES, etc.)
+ * Description: If you only need the size constants (MLKEM_LEN_PUBLIC_KEY, etc.)
  *              but no function declarations, set MLK_CONFIG_CONSTANTS_ONLY.
  *
  *              This only affects the public header mlkem_native.h, not
@@ -425,16 +427,16 @@
  * default included by mlkem-native, and the latter is needed for this example
  * since we rely on the additional randombytes_reset() API. */
 
-#define MLK_CONFIG_CUSTOM_RANDOMBYTES
-#if !defined(__ASSEMBLER__)
-#include <stdint.h>
-#include "src/sys.h"
-#include "rng/randombytes.h"
-static MLK_INLINE int mlk_randombytes(uint8_t *ptr, size_t len)
-{
-    return randombytes(ptr, len);
-}
-#endif /* !__ASSEMBLER__ */
+// #define MLK_CONFIG_CUSTOM_RANDOMBYTES
+// #if !defined(__ASSEMBLER__)
+// #include <stdint.h>
+// #include "src/sys.h"
+// #include "test_only_rng/notrandombytes.h"
+// static MLK_INLINE int mlk_randombytes(uint8_t *ptr, size_t len)
+// {
+//     return randombytes(ptr, len);
+// }
+// #endif /* !__ASSEMBLER__ */
 
 /******************************************************************************
  * Name:        MLK_CONFIG_CUSTOM_CAPABILITY_FUNC

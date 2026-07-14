@@ -48,6 +48,10 @@
 #define MLK_NAMESPACE_PREFIX_K \
   MLK_CONCAT(MLK_ADD_PARAM_SET(MLK_CONFIG_NAMESPACE_PREFIX), _)
 
+#define MLK_TEMPO_NAMESPACE_PREFIX MLK_CONCAT(MLK_CONFIG_TEMPO_NAMESPACE_PREFIX, _)
+#define MLK_TEMPO_NAMESPACE_PREFIX_K \
+  MLK_CONCAT(MLK_ADD_PARAM_SET(MLK_CONFIG_TEMPO_NAMESPACE_PREFIX), _)
+
 /* Functions are prefixed by MLK_CONFIG_NAMESPACE_PREFIX.
  *
  * If multiple parameter sets are used, functions depending on the parameter
@@ -58,6 +62,9 @@
  */
 #define MLK_NAMESPACE(s) MLK_CONCAT(MLK_NAMESPACE_PREFIX, s)
 #define MLK_NAMESPACE_K(s) MLK_CONCAT(MLK_NAMESPACE_PREFIX_K, s)
+
+#define MLK_TEMPO_NAMESPACE(s) MLK_CONCAT(MLK_TEMPO_NAMESPACE_PREFIX, s)
+#define MLK_TEMPO_NAMESPACE_K(s) MLK_CONCAT(MLK_TEMPO_NAMESPACE_PREFIX_K, s)
 
 /* On Apple platforms, we need to emit leading underscore
  * in front of assembly symbols. We thus introducee a separate

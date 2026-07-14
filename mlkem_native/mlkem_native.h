@@ -77,23 +77,32 @@
 /* Sizes of cryptographic material, per parameter set */
 /* See mlkem/common.h for the arithmetic expressions giving rise to these */
 /* check-magic: off */
-#define MLKEM512_SECRETKEYBYTES 1632
-#define MLKEM512_PUBLICKEYBYTES 800
-#define MLKEM512_CIPHERTEXTBYTES 768
-#define MLKEM512_TEMPO_APKBYTES 848
-#define MLKEM512_TEMPO_TAGBYTES 32
+#define MLKEM512_LEN_SECRET_KEY 1632
+#define MLKEM512_LEN_PUBLIC_KEY 800
+#define MLKEM512_LEN_CIPHERTEXT 768
+#define TEMPO512_LEN_SECRET_KEY MLKEM512_LEN_SECRET_KEY
+#define TEMPO512_LEN_PUBLIC_KEY MLKEM512_LEN_PUBLIC_KEY
+#define TEMPO512_LEN_CIPHERTEXT MLKEM512_LEN_CIPHERTEXT
+#define TEMPO512_LEN_APK 848
+#define TEMPO512_LEN_TAG 32
 
-#define MLKEM768_SECRETKEYBYTES 2400
-#define MLKEM768_PUBLICKEYBYTES 1184
-#define MLKEM768_CIPHERTEXTBYTES 1088
-#define MLKEM768_TEMPO_APKBYTES 1256
-#define MLKEM768_TEMPO_TAGBYTES 48
+#define MLKEM768_LEN_SECRET_KEY 2400
+#define MLKEM768_LEN_PUBLIC_KEY 1184
+#define MLKEM768_LEN_CIPHERTEXT 1088
+#define TEMPO768_LEN_SECRET_KEY MLKEM768_LEN_SECRET_KEY
+#define TEMPO768_LEN_PUBLIC_KEY MLKEM768_LEN_PUBLIC_KEY
+#define TEMPO768_LEN_CIPHERTEXT MLKEM768_LEN_CIPHERTEXT
+#define TEMPO768_LEN_APK 1256
+#define TEMPO768_LEN_TAG 48
 
-#define MLKEM1024_SECRETKEYBYTES 3168
-#define MLKEM1024_PUBLICKEYBYTES 1568
-#define MLKEM1024_CIPHERTEXTBYTES 1568
-#define MLKEM1024_TEMPO_APKBYTES 1664
-#define MLKEM1024_TEMPO_TAGBYTES 64
+#define MLKEM1024_LEN_SECRET_KEY 3168
+#define MLKEM1024_LEN_PUBLIC_KEY 1568
+#define MLKEM1024_LEN_CIPHERTEXT 1568
+#define TEMPO1024_LEN_SECRET_KEY MLKEM1024_LEN_SECRET_KEY
+#define TEMPO1024_LEN_PUBLIC_KEY MLKEM1024_LEN_PUBLIC_KEY
+#define TEMPO1024_LEN_CIPHERTEXT MLKEM1024_LEN_CIPHERTEXT
+#define TEMPO1024_LEN_APK 1664
+#define TEMPO1024_LEN_TAG 64
 
 /* check-magic: on */
 
@@ -103,31 +112,42 @@
 #define MLKEM768_SYMBYTES MLKEM_SYMBYTES
 #define MLKEM1024_SYMBYTES MLKEM_SYMBYTES
 /* Size of shared secret in bytes (level-independent) */
-#define MLKEM_BYTES 32
-#define MLKEM512_BYTES MLKEM_BYTES
-#define MLKEM768_BYTES MLKEM_BYTES
-#define MLKEM1024_BYTES MLKEM_BYTES
+#define MLKEM_LEN_SHARED_SECRET 32
+#define MLKEM512_LEN_SHARED_SECRET MLKEM_LEN_SHARED_SECRET
+#define MLKEM768_LEN_SHARED_SECRET MLKEM_LEN_SHARED_SECRET
+#define MLKEM1024_LEN_SHARED_SECRET MLKEM_LEN_SHARED_SECRET
 
-#define MLKEM512_TEMPO_BYTES 16
-#define MLKEM768_TEMPO_BYTES 24
-#define MLKEM1024_TEMPO_BYTES 32
+#define TEMPO512_LEN_SHARED_SECRET 16
+#define TEMPO768_LEN_SHARED_SECRET 24
+#define TEMPO1024_LEN_SHARED_SECRET 32
 
-#define MLKEM_TEMPO_SIDBYTES 32
-#define MLKEM_TEMPO_PWDBYTES 32
+#define TEMPO_LEN_SID 32
+#define TEMPO_LEN_PWD 32
+
+#define TEMPO_LEN_EPHEMERAL_KEY MLKEM_LEN_SHARED_SECRET
+#define TEMPO512_LEN_EPHEMERAL_KEY TEMPO_LEN_EPHEMERAL_KEY
+#define TEMPO768_LEN_EPHEMERAL_KEY TEMPO_LEN_EPHEMERAL_KEY
+#define TEMPO1024_LEN_EPHEMERAL_KEY TEMPO_LEN_EPHEMERAL_KEY
 
 /* Sizes of cryptographic material, as a function of LVL=512,768,1024 */
-#define MLKEM_SECRETKEYBYTES_(LVL) MLKEM##LVL##_SECRETKEYBYTES
-#define MLKEM_PUBLICKEYBYTES_(LVL) MLKEM##LVL##_PUBLICKEYBYTES
-#define MLKEM_CIPHERTEXTBYTES_(LVL) MLKEM##LVL##_CIPHERTEXTBYTES
-#define MLKEM_TEMPO_BYTES_(LVL) MLKEM##LVL##_TEMPO_BYTES
-#define MLKEM_TEMPO_APKBYTES_(LVL) MLKEM##LVL##_TEMPO_APKBYTES
-#define MLKEM_TEMPO_TAGBYTES_(LVL) MLKEM##LVL##_TEMPO_TAGBYTES
-#define MLKEM_SECRETKEYBYTES(LVL) MLKEM_SECRETKEYBYTES_(LVL)
-#define MLKEM_PUBLICKEYBYTES(LVL) MLKEM_PUBLICKEYBYTES_(LVL)
-#define MLKEM_CIPHERTEXTBYTES(LVL) MLKEM_CIPHERTEXTBYTES_(LVL)
-#define MLKEM_TEMPO_BYTES(LVL) MLKEM_TEMPO_BYTES_(LVL)
-#define MLKEM_TEMPO_APKBYTES(LVL) MLKEM_TEMPO_APKBYTES_(LVL)
-#define MLKEM_TEMPO_TAGBYTES(LVL) MLKEM_TEMPO_TAGBYTES_(LVL)
+#define MLKEM_LEN_SECRET_KEY_(LVL) MLKEM##LVL##_LEN_SECRET_KEY
+#define MLKEM_LEN_PUBLIC_KEY_(LVL) MLKEM##LVL##_LEN_PUBLIC_KEY
+#define MLKEM_LEN_CIPHERTEXT_(LVL) MLKEM##LVL##_LEN_CIPHERTEXT
+#define TEMPO_LEN_SECRET_KEY_(LVL) TEMPO##LVL##_LEN_SECRET_KEY
+#define TEMPO_LEN_PUBLIC_KEY_(LVL) TEMPO##LVL##_LEN_PUBLIC_KEY
+#define TEMPO_LEN_CIPHERTEXT_(LVL) TEMPO##LVL##_LEN_CIPHERTEXT
+#define TEMPO_LEN_SHARED_SECRET_(LVL) TEMPO##LVL##_LEN_SHARED_SECRET
+#define TEMPO_LEN_APK_(LVL) TEMPO##LVL##_LEN_APK
+#define TEMPO_LEN_TAG_(LVL) TEMPO##LVL##_LEN_TAG
+#define MLKEM_LEN_SECRET_KEY(LVL) MLKEM_LEN_SECRET_KEY_(LVL)
+#define MLKEM_LEN_PUBLIC_KEY(LVL) MLKEM_LEN_PUBLIC_KEY_(LVL)
+#define MLKEM_LEN_CIPHERTEXT(LVL) MLKEM_LEN_CIPHERTEXT_(LVL)
+#define TEMPO_LEN_SECRET_KEY(LVL) TEMPO_LEN_SECRET_KEY_(LVL)
+#define TEMPO_LEN_PUBLIC_KEY(LVL) TEMPO_LEN_PUBLIC_KEY_(LVL)
+#define TEMPO_LEN_CIPHERTEXT(LVL) TEMPO_LEN_CIPHERTEXT_(LVL)
+#define TEMPO_LEN_SHARED_SECRET(LVL) TEMPO_LEN_SHARED_SECRET_(LVL)
+#define TEMPO_LEN_APK(LVL) TEMPO_LEN_APK_(LVL)
+#define TEMPO_LEN_TAG(LVL) TEMPO_LEN_TAG_(LVL)
 
 /****************************** Error codes ***********************************/
 
@@ -162,8 +182,11 @@
 #if defined(MLK_CONFIG_MULTILEVEL_BUILD)
 #define MLK_CONFIG_API_NAMESPACE_PREFIX \
     MLK_API_CONCAT(MLK_CONFIG_NAMESPACE_PREFIX, MLK_CONFIG_PARAMETER_SET)
+#define MLK_CONFIG_API_TEMPO_NAMESPACE_PREFIX \
+    MLK_API_CONCAT(MLK_CONFIG_TEMPO_NAMESPACE_PREFIX, MLK_CONFIG_PARAMETER_SET)
 #else
 #define MLK_CONFIG_API_NAMESPACE_PREFIX MLK_CONFIG_NAMESPACE_PREFIX
+#define MLK_CONFIG_API_TEMPO_NAMESPACE_PREFIX MLK_CONFIG_TEMPO_NAMESPACE_PREFIX
 #endif
 
 #if defined(MLK_CONFIG_NO_SUPERCOP)
@@ -186,6 +209,9 @@
 
 #define MLK_API_NAMESPACE(sym) \
     MLK_API_CONCAT_UNDERSCORE(MLK_CONFIG_API_NAMESPACE_PREFIX, sym)
+
+#define MLK_API_TEMPO_NAMESPACE(sym) \
+    MLK_API_CONCAT_UNDERSCORE(MLK_CONFIG_API_TEMPO_NAMESPACE_PREFIX, sym)
 
 #if defined(__GNUC__) || defined(clang)
 #define MLK_API_MUST_CHECK_RETURN_VALUE __attribute__((warn_unused_result))
@@ -215,9 +241,9 @@ extern "C"
      *              for CCA-secure ML-KEM key encapsulation mechanism
      *
      * Arguments:   - uint8_t pk[]: pointer to output public key, an array of
-     *                 length MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
+     *                 length MLKEM{512,768,1024}_LEN_PUBLIC_KEY bytes.
      *              - uint8_t sk[]: pointer to output private key, an array of
-     *                  of MLKEM{512,768,1024}_SECRETKEYBYTES bytes.
+     *                  of MLKEM{512,768,1024}_LEN_SECRET_KEY bytes.
      *              - uint8_t *coins: pointer to input randomness, an array of
      *                  2*MLKEM_SYMBYTES uniformly random bytes.
      *
@@ -231,8 +257,8 @@ extern "C"
     MLK_API_QUALIFIER
     MLK_API_MUST_CHECK_RETURN_VALUE
     int MLK_API_NAMESPACE(keypair_derand)(
-        uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-        uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
+        uint8_t pk[MLKEM_LEN_PUBLIC_KEY(MLK_CONFIG_API_PARAMETER_SET)],
+        uint8_t sk[MLKEM_LEN_SECRET_KEY(MLK_CONFIG_API_PARAMETER_SET)],
         const uint8_t coins[2 * MLKEM_SYMBYTES]);
 
 #if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
@@ -243,9 +269,9 @@ extern "C"
      *              for CCA-secure ML-KEM key encapsulation mechanism
      *
      * Arguments:   - uint8_t *pk: pointer to output public key, an array of
-     *                 MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
+     *                 MLKEM{512,768,1024}_LEN_PUBLIC_KEY bytes.
      *              - uint8_t *sk: pointer to output private key, an array of
-     *                 MLKEM{512,768,1024}_SECRETKEYBYTES bytes.
+     *                 MLKEM{512,768,1024}_LEN_SECRET_KEY bytes.
      *
      * Returns:     - 0: On success
      *              - MLK_ERR_FAIL: If MLK_CONFIG_KEYGEN_PCT is enabled and the
@@ -258,8 +284,8 @@ extern "C"
     MLK_API_QUALIFIER
     MLK_API_MUST_CHECK_RETURN_VALUE
     int MLK_API_NAMESPACE(keypair)(
-        uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-        uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
+        uint8_t pk[MLKEM_LEN_PUBLIC_KEY(MLK_CONFIG_API_PARAMETER_SET)],
+        uint8_t sk[MLKEM_LEN_SECRET_KEY(MLK_CONFIG_API_PARAMETER_SET)]);
 #endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
 
     /*************************************************
@@ -269,11 +295,11 @@ extern "C"
      *              secret for given public key
      *
      * Arguments:   - uint8_t *ct: pointer to output cipher text, an array of
-     *                 MLKEM{512,768,1024}_CIPHERTEXTBYTES bytes.
+     *                 MLKEM{512,768,1024}_LEN_CIPHERTEXT bytes.
      *              - uint8_t *ss: pointer to output shared secret, an array of
-     *                 MLKEM_BYTES bytes.
+     *                 MLKEM_LEN_SHARED_SECRET bytes.
      *              - const uint8_t *pk: pointer to input public key, an array of
-     *                 MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
+     *                 MLKEM{512,768,1024}_LEN_PUBLIC_KEY bytes.
      *              - const uint8_t *coins: pointer to input randomness, an array of
      *                 MLKEM_SYMBYTES bytes.
      *
@@ -287,9 +313,9 @@ extern "C"
     MLK_API_QUALIFIER
     MLK_API_MUST_CHECK_RETURN_VALUE
     int MLK_API_NAMESPACE(enc_derand)(
-        uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-        uint8_t ss[MLKEM_BYTES],
-        const uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
+        uint8_t ct[MLKEM_LEN_CIPHERTEXT(MLK_CONFIG_API_PARAMETER_SET)],
+        uint8_t ss[MLKEM_LEN_SHARED_SECRET],
+        const uint8_t pk[MLKEM_LEN_PUBLIC_KEY(MLK_CONFIG_API_PARAMETER_SET)],
         const uint8_t coins[MLKEM_SYMBYTES]);
 
 #if !defined(MLK_CONFIG_NO_RANDOMIZED_API)
@@ -300,11 +326,11 @@ extern "C"
      *              secret for given public key
      *
      * Arguments:   - uint8_t *ct: pointer to output cipher text, an array of
-     *                 MLKEM{512,768,1024}_CIPHERTEXTBYTES bytes.
+     *                 MLKEM{512,768,1024}_LEN_CIPHERTEXT bytes.
      *              - uint8_t *ss: pointer to output shared secret, an array of
-     *                 MLKEM_BYTES bytes.
+     *                 MLKEM_LEN_SHARED_SECRET bytes.
      *              - const uint8_t *pk: pointer to input public key, an array of
-     *                 MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
+     *                 MLKEM{512,768,1024}_LEN_PUBLIC_KEY bytes.
      *
      * Returns: - 0 on success
      *          - MLK_ERR_FAIL: If the 'modulus check' @[FIPS203, Section 7.2]
@@ -317,9 +343,9 @@ extern "C"
     MLK_API_QUALIFIER
     MLK_API_MUST_CHECK_RETURN_VALUE
     int MLK_API_NAMESPACE(enc)(
-        uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-        uint8_t ss[MLKEM_BYTES],
-        const uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
+        uint8_t ct[MLKEM_LEN_CIPHERTEXT(MLK_CONFIG_API_PARAMETER_SET)],
+        uint8_t ss[MLKEM_LEN_SHARED_SECRET],
+        const uint8_t pk[MLKEM_LEN_PUBLIC_KEY(MLK_CONFIG_API_PARAMETER_SET)]);
 #endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
 
     /*************************************************
@@ -329,11 +355,11 @@ extern "C"
      *              cipher text and private key
      *
      * Arguments:   - uint8_t *ss: pointer to output shared secret, an array of
-     *                 MLKEM_BYTES bytes.
+     *                 MLKEM_LEN_SHARED_SECRET bytes.
      *              - const uint8_t *ct: pointer to input cipher text, an array of
-     *                 MLKEM{512,768,1024}_CIPHERTEXTBYTES bytes.
+     *                 MLKEM{512,768,1024}_LEN_CIPHERTEXT bytes.
      *              - const uint8_t *sk: pointer to input private key, an array of
-     *                 MLKEM{512,768,1024}_SECRETKEYBYTES bytes.
+     *                 MLKEM{512,768,1024}_LEN_SECRET_KEY bytes.
      *
      * Returns: - 0 on success
      *          - MLK_ERR_FAIL: If the 'hash check' @[FIPS203, Section 7.3]
@@ -345,9 +371,9 @@ extern "C"
     MLK_API_QUALIFIER
     MLK_API_MUST_CHECK_RETURN_VALUE
     int MLK_API_NAMESPACE(dec)(
-        uint8_t ss[MLKEM_BYTES],
-        const uint8_t ct[MLKEM_CIPHERTEXTBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-        const uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
+        uint8_t ss[MLKEM_LEN_SHARED_SECRET],
+        const uint8_t ct[MLKEM_LEN_CIPHERTEXT(MLK_CONFIG_API_PARAMETER_SET)],
+        const uint8_t sk[MLKEM_LEN_SECRET_KEY(MLK_CONFIG_API_PARAMETER_SET)]);
 
     /*************************************************
      * Name:        crypto_kem_check_pk
@@ -356,7 +382,7 @@ extern "C"
      *              i.e., ensures that coefficients are in [0,q-1].
      *
      * Arguments:   - const uint8_t *pk: pointer to input public key, an array of
-     *                 MLKEM{512,768,1024}_PUBLICKEYBYTES bytes.
+     *                 MLKEM{512,768,1024}_LEN_PUBLIC_KEY bytes.
      *
      * Returns: - 0 on success
      *          - MLK_ERR_FAIL: If the modulus check failed.
@@ -367,7 +393,7 @@ extern "C"
     MLK_API_QUALIFIER
     MLK_API_MUST_CHECK_RETURN_VALUE
     int MLK_API_NAMESPACE(check_pk)(
-        const uint8_t pk[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
+        const uint8_t pk[MLKEM_LEN_PUBLIC_KEY(MLK_CONFIG_API_PARAMETER_SET)]);
 
     /*************************************************
      * Name:        crypto_kem_check_sk
@@ -377,7 +403,7 @@ extern "C"
      *              sk[768𝑘+32 ∶ 768𝑘+64] = H(pk)= H(sk[384𝑘 : 768𝑘+32])
      *
      * Arguments:   - const uint8_t *sk: pointer to input private key, an array of
-     *                 MLKEM{512,768,1024}_SECRETKEYBYTES bytes.
+     *                 MLKEM{512,768,1024}_LEN_SECRET_KEY bytes.
      *
      * Returns: - 0 on success
      *          - MLK_ERR_FAIL: If the public key hash check failed.
@@ -388,48 +414,48 @@ extern "C"
     MLK_API_QUALIFIER
     MLK_API_MUST_CHECK_RETURN_VALUE
     int MLK_API_NAMESPACE(check_sk)(
-        const uint8_t sk[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
+        const uint8_t sk[MLKEM_LEN_SECRET_KEY(MLK_CONFIG_API_PARAMETER_SET)]);
 
     MLK_API_QUALIFIER
-    void MLK_API_NAMESPACE(tempo_keygen)(
-        uint8_t public_key[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-        uint8_t secret_key[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-        uint8_t apk[MLKEM_TEMPO_APKBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-        const uint8_t sid[MLKEM_TEMPO_SIDBYTES],
-        const uint8_t pwd[MLKEM_TEMPO_PWDBYTES]);
+    void MLK_API_TEMPO_NAMESPACE(keygen)(
+        uint8_t public_key[TEMPO_LEN_PUBLIC_KEY(MLK_CONFIG_API_PARAMETER_SET)],
+        uint8_t secret_key[TEMPO_LEN_SECRET_KEY(MLK_CONFIG_API_PARAMETER_SET)],
+        uint8_t apk[TEMPO_LEN_APK(MLK_CONFIG_API_PARAMETER_SET)],
+        const uint8_t sid[TEMPO_LEN_SID],
+        const uint8_t pwd[TEMPO_LEN_PWD]);
 
     MLK_API_QUALIFIER
-    void MLK_API_NAMESPACE(tempo_encaps)(
-        uint8_t public_key[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-        uint8_t ciphertext[MLKEM_CIPHERTEXTBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-        uint8_t ephemeral_key[MLKEM_BYTES],
-        const uint8_t sid[MLKEM_TEMPO_SIDBYTES],
-        const uint8_t pwd[MLKEM_TEMPO_PWDBYTES],
-        const uint8_t apk[MLKEM_TEMPO_APKBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
+    void MLK_API_TEMPO_NAMESPACE(encaps)(
+        uint8_t public_key[TEMPO_LEN_PUBLIC_KEY(MLK_CONFIG_API_PARAMETER_SET)],
+        uint8_t ciphertext[TEMPO_LEN_CIPHERTEXT(MLK_CONFIG_API_PARAMETER_SET)],
+        uint8_t ephemeral_key[TEMPO_LEN_EPHEMERAL_KEY],
+        const uint8_t sid[TEMPO_LEN_SID],
+        const uint8_t pwd[TEMPO_LEN_PWD],
+        const uint8_t apk[TEMPO_LEN_APK(MLK_CONFIG_API_PARAMETER_SET)]);
 
     MLK_API_QUALIFIER
-    void MLK_API_NAMESPACE(tempo_decaps)(
-        uint8_t ephemeral_key[MLKEM_BYTES],
-        const uint8_t secret_key[MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-        const uint8_t ciphertext[MLKEM_CIPHERTEXTBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
+    void MLK_API_TEMPO_NAMESPACE(decaps)(
+        uint8_t ephemeral_key[TEMPO_LEN_EPHEMERAL_KEY],
+        const uint8_t secret_key[TEMPO_LEN_SECRET_KEY(MLK_CONFIG_API_PARAMETER_SET)],
+        const uint8_t ciphertext[TEMPO_LEN_CIPHERTEXT(MLK_CONFIG_API_PARAMETER_SET)]);
 
     MLK_API_QUALIFIER
-    void MLK_API_NAMESPACE(tempo_confirm)(
-        uint8_t tag_a[MLKEM_TEMPO_TAGBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-        uint8_t tag_b[MLKEM_TEMPO_TAGBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-        uint8_t shared_secret[MLKEM_TEMPO_BYTES(MLK_CONFIG_API_PARAMETER_SET)],
-        const uint8_t sid[MLKEM_TEMPO_SIDBYTES],
-        const uint8_t pwd[MLKEM_TEMPO_PWDBYTES],
-        const uint8_t apk[MLKEM_TEMPO_APKBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-        const uint8_t ciphertext[MLKEM_CIPHERTEXTBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-        const uint8_t public_key[MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-        const uint8_t ephemeral_key[MLKEM_BYTES], );
+    void MLK_API_TEMPO_NAMESPACE(confirm)(
+        uint8_t tag_a[TEMPO_LEN_TAG(MLK_CONFIG_API_PARAMETER_SET)],
+        uint8_t tag_b[TEMPO_LEN_TAG(MLK_CONFIG_API_PARAMETER_SET)],
+        uint8_t shared_secret[TEMPO_LEN_SHARED_SECRET(MLK_CONFIG_API_PARAMETER_SET)],
+        const uint8_t sid[TEMPO_LEN_SID],
+        const uint8_t pwd[TEMPO_LEN_PWD],
+        const uint8_t apk[TEMPO_LEN_APK(MLK_CONFIG_API_PARAMETER_SET)],
+        const uint8_t ciphertext[TEMPO_LEN_CIPHERTEXT(MLK_CONFIG_API_PARAMETER_SET)],
+        const uint8_t public_key[TEMPO_LEN_PUBLIC_KEY(MLK_CONFIG_API_PARAMETER_SET)],
+        const uint8_t ephemeral_key[TEMPO_LEN_EPHEMERAL_KEY]);
 
     MLK_API_QUALIFIER
     MLK_API_MUST_CHECK_RETURN_VALUE
-    int MLK_API_NAMESPACE(tempo_verify)(
-        uint8_t tag[MLKEM_TEMPO_TAGBYTES(MLK_CONFIG_API_PARAMETER_SET)],
-        uint8_t peer_tag[MLKEM_TEMPO_TAGBYTES(MLK_CONFIG_API_PARAMETER_SET)]);
+    int MLK_API_TEMPO_NAMESPACE(verify)(
+        uint8_t tag[TEMPO_LEN_TAG(MLK_CONFIG_API_PARAMETER_SET)],
+        uint8_t peer_tag[TEMPO_LEN_TAG(MLK_CONFIG_API_PARAMETER_SET)]);
 
 #ifdef __cplusplus
 }
@@ -439,12 +465,12 @@ extern "C"
 
 #if !defined(MLK_CONFIG_API_NO_SUPERCOP)
 /* Export API in SUPERCOP naming scheme CRYPTO_xxx / crypto_kem_xxx */
-#define CRYPTO_SECRETKEYBYTES MLKEM_SECRETKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)
-#define CRYPTO_PUBLICKEYBYTES MLKEM_PUBLICKEYBYTES(MLK_CONFIG_API_PARAMETER_SET)
-#define CRYPTO_CIPHERTEXTBYTES \
-    MLKEM_CIPHERTEXTBYTES(MLK_CONFIG_API_PARAMETER_SET)
+#define CRYPTO_LEN_SECRET_KEY MLKEM_LEN_SECRET_KEY(MLK_CONFIG_API_PARAMETER_SET)
+#define CRYPTO_LEN_PUBLIC_KEY MLKEM_LEN_PUBLIC_KEY(MLK_CONFIG_API_PARAMETER_SET)
+#define CRYPTO_LEN_CIPHERTEXT \
+    MLKEM_LEN_CIPHERTEXT(MLK_CONFIG_API_PARAMETER_SET)
 #define CRYPTO_SYMBYTES MLKEM_SYMBYTES
-#define CRYPTO_BYTES MLKEM_BYTES
+#define CRYPTO_BYTES MLKEM_LEN_SHARED_SECRET
 
 #define crypto_kem_keypair_derand MLK_API_NAMESPACE(keypair_derand)
 #define crypto_kem_keypair MLK_API_NAMESPACE(keypair)

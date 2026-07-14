@@ -40,7 +40,7 @@
 /* Reference: Not implemented in the reference implementation @[REF]. */
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int mlk_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
+int mlk_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_LEN_PUBLIC_KEY])
 {
   int ret = 0;
   mlk_polyvec p;
@@ -64,7 +64,7 @@ int mlk_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
 /* Reference: Not implemented in the reference implementation @[REF]. */
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int mlk_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
+int mlk_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_LEN_SECRET_KEY])
 {
   int ret = 0;
   uint8_t test[MLKEM_SYMBYTES];
@@ -76,17 +76,17 @@ int mlk_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
    */
 
   /* Declassify the public part of the secret key */
-  MLK_CT_TESTING_DECLASSIFY(sk + MLKEM_INDCPA_SECRETKEYBYTES,
-                            MLKEM_INDCCA_PUBLICKEYBYTES);
+  MLK_CT_TESTING_DECLASSIFY(sk + MLKEM_INDCPA_LEN_SECRET_KEY,
+                            MLKEM_INDCCA_LEN_PUBLIC_KEY);
   MLK_CT_TESTING_DECLASSIFY(
-      sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES, MLKEM_SYMBYTES);
+      sk + MLKEM_INDCCA_LEN_SECRET_KEY - 2 * MLKEM_SYMBYTES, MLKEM_SYMBYTES);
 
-  mlk_hash_h(test, sk + MLKEM_INDCPA_SECRETKEYBYTES,
-             MLKEM_INDCCA_PUBLICKEYBYTES);
+  mlk_hash_h(test, sk + MLKEM_INDCPA_LEN_SECRET_KEY,
+             MLKEM_INDCCA_LEN_PUBLIC_KEY);
   /* This doesn't have to be a constant-time memcmp, but it's the only place
    * in the library where a normal memcmp would be used otherwise, so for sake
    * of minimizing stdlib dependency, we use our constant-time one anyway. */
-  ret = mlk_ct_memcmp(sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES,
+  ret = mlk_ct_memcmp(sk + MLKEM_INDCCA_LEN_SECRET_KEY - 2 * MLKEM_SYMBYTES,
                       test, MLKEM_SYMBYTES)
             ? MLK_ERR_FAIL
             : 0;
@@ -98,11 +98,11 @@ int mlk_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
 }
 
 MLK_MUST_CHECK_RETURN_VALUE
-static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                         uint8_t const sk[MLKEM_INDCCA_SECRETKEYBYTES])
+static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_LEN_PUBLIC_KEY],
+                         uint8_t const sk[MLKEM_INDCCA_LEN_SECRET_KEY])
     __contract__(
-        requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
-            requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
+        requires(memory_no_alias(pk, MLKEM_INDCCA_LEN_PUBLIC_KEY))
+            requires(memory_no_alias(sk, MLKEM_INDCCA_LEN_SECRET_KEY))
                 ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
                         return_value == MLK_ERR_RNG_FAIL));
 
@@ -113,11 +113,11 @@ static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
 
 /* Reference: Not implemented in the reference implementation @[REF]. */
 MLK_MUST_CHECK_RETURN_VALUE
-static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                         uint8_t const sk[MLKEM_INDCCA_SECRETKEYBYTES])
+static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_LEN_PUBLIC_KEY],
+                         uint8_t const sk[MLKEM_INDCCA_LEN_SECRET_KEY])
 {
   int ret = 0;
-  uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES];
+  uint8_t ct[MLKEM_INDCCA_LEN_CIPHERTEXT];
   uint8_t ss_enc[MLKEM_SSBYTES];
   uint8_t ss_dec[MLKEM_SSBYTES];
 
@@ -156,13 +156,13 @@ cleanup:
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
   mlk_zeroize(ss_dec, MLKEM_SSBYTES);
   mlk_zeroize(ss_enc, MLKEM_SSBYTES);
-  mlk_zeroize(ct, MLKEM_INDCCA_CIPHERTEXTBYTES);
+  mlk_zeroize(ct, MLKEM_INDCCA_LEN_CIPHERTEXT);
   return ret;
 }
 #else  /* MLK_CONFIG_KEYGEN_PCT */
 MLK_MUST_CHECK_RETURN_VALUE
-static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                         uint8_t const sk[MLKEM_INDCCA_SECRETKEYBYTES])
+static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_LEN_PUBLIC_KEY],
+                         uint8_t const sk[MLKEM_INDCCA_LEN_SECRET_KEY])
 {
   /* Skip PCT */
   ((void)pk);
@@ -176,28 +176,28 @@ static int mlk_check_pct(uint8_t const pk[MLKEM_INDCCA_PUBLICKEYBYTES],
  *            - We optionally include PCT which is not present in
  *              the reference code. */
 MLK_EXTERNAL_API
-int mlk_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                           uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
+int mlk_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_LEN_PUBLIC_KEY],
+                           uint8_t sk[MLKEM_INDCCA_LEN_SECRET_KEY],
                            const uint8_t coins[2 * MLKEM_SYMBYTES])
 {
   mlk_indcpa_keypair_derand(pk, sk, coins);
 
-  mlk_memcpy(sk + MLKEM_INDCPA_SECRETKEYBYTES, pk, MLKEM_INDCCA_PUBLICKEYBYTES);
-  mlk_hash_h(sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES, pk,
-             MLKEM_INDCCA_PUBLICKEYBYTES);
+  mlk_memcpy(sk + MLKEM_INDCPA_LEN_SECRET_KEY, pk, MLKEM_INDCCA_LEN_PUBLIC_KEY);
+  mlk_hash_h(sk + MLKEM_INDCCA_LEN_SECRET_KEY - 2 * MLKEM_SYMBYTES, pk,
+             MLKEM_INDCCA_LEN_PUBLIC_KEY);
   /* Value z for pseudo-random output on reject */
-  mlk_memcpy(sk + MLKEM_INDCCA_SECRETKEYBYTES - MLKEM_SYMBYTES,
+  mlk_memcpy(sk + MLKEM_INDCCA_LEN_SECRET_KEY - MLKEM_SYMBYTES,
              coins + MLKEM_SYMBYTES, MLKEM_SYMBYTES);
 
   /* Declassify public key */
-  MLK_CT_TESTING_DECLASSIFY(pk, MLKEM_INDCCA_PUBLICKEYBYTES);
+  MLK_CT_TESTING_DECLASSIFY(pk, MLKEM_INDCCA_LEN_PUBLIC_KEY);
 
   /* Pairwise Consistency Test (PCT) @[FIPS140_3_IG, p.87] */
   int ret = mlk_check_pct(pk, sk);
   if (ret != 0)
   {
-    mlk_zeroize(pk, MLKEM_INDCCA_PUBLICKEYBYTES);
-    mlk_zeroize(sk, MLKEM_INDCCA_SECRETKEYBYTES);
+    mlk_zeroize(pk, MLKEM_INDCCA_LEN_PUBLIC_KEY);
+    mlk_zeroize(sk, MLKEM_INDCCA_LEN_SECRET_KEY);
   }
   return ret;
 }
@@ -206,8 +206,8 @@ int mlk_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
 /* Reference: `crypto_kem_keypair()` in the reference implementation @[REF]
  *            - We zeroize the stack buffer */
 MLK_EXTERNAL_API
-int mlk_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                    uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
+int mlk_kem_keypair(uint8_t pk[MLKEM_INDCCA_LEN_PUBLIC_KEY],
+                    uint8_t sk[MLKEM_INDCCA_LEN_SECRET_KEY])
 {
   int ret = 0;
   uint8_t coins[2 * MLKEM_SYMBYTES];
@@ -235,9 +235,9 @@ cleanup:
  *            - We include public key check
  *            - We include stack buffer zeroization */
 MLK_EXTERNAL_API
-int mlk_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
+int mlk_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_LEN_CIPHERTEXT],
                        uint8_t ss[MLKEM_SSBYTES],
-                       const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
+                       const uint8_t pk[MLKEM_INDCCA_LEN_PUBLIC_KEY],
                        const uint8_t coins[MLKEM_SYMBYTES])
 {
   int ret = 0;
@@ -254,7 +254,7 @@ int mlk_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
   mlk_memcpy(buf, coins, MLKEM_SYMBYTES);
 
   /* Multitarget countermeasure for coins + contributory KEM */
-  mlk_hash_h(buf + MLKEM_SYMBYTES, pk, MLKEM_INDCCA_PUBLICKEYBYTES);
+  mlk_hash_h(buf + MLKEM_SYMBYTES, pk, MLKEM_INDCCA_LEN_PUBLIC_KEY);
   mlk_hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
 
   /* coins are in kr+MLKEM_SYMBYTES */
@@ -278,9 +278,9 @@ cleanup:
 /* Reference: `crypto_kem_enc()` in the reference implementation @[REF]
  *            - We include stack buffer zeroization */
 MLK_EXTERNAL_API
-int mlk_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
+int mlk_kem_enc(uint8_t ct[MLKEM_INDCCA_LEN_CIPHERTEXT],
                 uint8_t ss[MLKEM_SSBYTES],
-                const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
+                const uint8_t pk[MLKEM_INDCCA_LEN_PUBLIC_KEY])
 {
   int ret = 0;
   uint8_t coins[MLKEM_SYMBYTES];
@@ -308,15 +308,15 @@ cleanup:
  *            - We include stack buffer zeroization */
 MLK_EXTERNAL_API
 int mlk_kem_dec(uint8_t ss[MLKEM_SSBYTES],
-                const uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
-                const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
+                const uint8_t ct[MLKEM_INDCCA_LEN_CIPHERTEXT],
+                const uint8_t sk[MLKEM_INDCCA_LEN_SECRET_KEY])
 {
   int ret = 0;
   uint8_t fail;
-  const uint8_t *pk = sk + MLKEM_INDCPA_SECRETKEYBYTES;
+  const uint8_t *pk = sk + MLKEM_INDCPA_LEN_SECRET_KEY;
   uint8_t buf[2 * MLKEM_SYMBYTES];
   uint8_t kr[2 * MLKEM_SYMBYTES];
-  uint8_t tmp[MLKEM_SYMBYTES + MLKEM_INDCCA_CIPHERTEXTBYTES];
+  uint8_t tmp[MLKEM_SYMBYTES + MLKEM_INDCCA_LEN_CIPHERTEXT];
 
   /* Specification: Implements @[FIPS203, Section 7.3, Hash check] */
   ret = mlk_kem_check_sk(sk);
@@ -333,7 +333,7 @@ int mlk_kem_dec(uint8_t ss[MLKEM_SSBYTES],
 
   /* Multitarget countermeasure for coins + contributory KEM */
   mlk_memcpy(buf + MLKEM_SYMBYTES,
-             sk + MLKEM_INDCCA_SECRETKEYBYTES - 2 * MLKEM_SYMBYTES,
+             sk + MLKEM_INDCCA_LEN_SECRET_KEY - 2 * MLKEM_SYMBYTES,
              MLKEM_SYMBYTES);
   mlk_hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
 
@@ -345,13 +345,13 @@ int mlk_kem_dec(uint8_t ss[MLKEM_SSBYTES],
     goto cleanup;
   }
 
-  fail = mlk_ct_memcmp(ct, tmp, MLKEM_INDCCA_CIPHERTEXTBYTES);
+  fail = mlk_ct_memcmp(ct, tmp, MLKEM_INDCCA_LEN_CIPHERTEXT);
 
   /* Compute rejection key */
-  mlk_memcpy(tmp, sk + MLKEM_INDCCA_SECRETKEYBYTES - MLKEM_SYMBYTES,
+  mlk_memcpy(tmp, sk + MLKEM_INDCCA_LEN_SECRET_KEY - MLKEM_SYMBYTES,
              MLKEM_SYMBYTES);
-  mlk_memcpy(tmp + MLKEM_SYMBYTES, ct, MLKEM_INDCCA_CIPHERTEXTBYTES);
-  mlk_hash_j(ss, tmp, MLKEM_SYMBYTES + MLKEM_INDCCA_CIPHERTEXTBYTES);
+  mlk_memcpy(tmp + MLKEM_SYMBYTES, ct, MLKEM_INDCCA_LEN_CIPHERTEXT);
+  mlk_hash_j(ss, tmp, MLKEM_SYMBYTES + MLKEM_INDCCA_LEN_CIPHERTEXT);
 
   /* Copy true key to return buffer if fail is 0 */
   mlk_ct_cmov_zero(ss, kr, MLKEM_SYMBYTES, fail);
@@ -359,7 +359,7 @@ int mlk_kem_dec(uint8_t ss[MLKEM_SSBYTES],
 cleanup:
   /* Specification: Partially implements
    * @[FIPS203, Section 3.3, Destruction of intermediate values] */
-  mlk_zeroize(tmp, MLKEM_SYMBYTES + MLKEM_INDCCA_CIPHERTEXTBYTES);
+  mlk_zeroize(tmp, MLKEM_SYMBYTES + MLKEM_INDCCA_LEN_CIPHERTEXT);
   mlk_zeroize(kr, 2 * MLKEM_SYMBYTES);
   mlk_zeroize(buf, 2 * MLKEM_SYMBYTES);
 

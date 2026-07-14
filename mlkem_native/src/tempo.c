@@ -58,18 +58,18 @@ static void h_1(
     const uint8_t *seed,
     const uint8_t *r_seed)
 {
-    const size_t inlen = MLKEM_TEMPO_SIDBYTES +
-                         MLKEM_TEMPO_PWDBYTES +
+    const size_t inlen = TEMPO_LEN_SID +
+                         TEMPO_LEN_PWD +
                          MLKEM_SYMBYTES +
-                         MLKEM_TEMPO_3LAMBDA;
+                         TEMPO_3LAMBDA;
     const size_t outlen = MLKEM_SYMBYTES;
     uint8_t input[inlen];
     uint8_t output[outlen];
     size_t i = 0;
-    memcpy(input, sid, MLKEM_TEMPO_SIDBYTES);
-    memcpy(input + (i += MLKEM_TEMPO_SIDBYTES), pwd, MLKEM_TEMPO_PWDBYTES);
-    memcpy(input + (i += MLKEM_TEMPO_PWDBYTES), seed, MLKEM_SYMBYTES);
-    memcpy(input + (i += MLKEM_SYMBYTES), r_seed, MLKEM_TEMPO_3LAMBDA);
+    memcpy(input, sid, TEMPO_LEN_SID);
+    memcpy(input + (i += TEMPO_LEN_SID), pwd, TEMPO_LEN_PWD);
+    memcpy(input + (i += TEMPO_LEN_PWD), seed, MLKEM_SYMBYTES);
+    memcpy(input + (i += MLKEM_SYMBYTES), r_seed, TEMPO_3LAMBDA);
     mlk_shake256(output, outlen, input, inlen);
     h_fls(r, output);
     mlk_zeroize(input, inlen);
@@ -84,17 +84,17 @@ static void h_2(
     const uint8_t *seed,
     const uint8_t *v_buf)
 {
-    const size_t inlen = MLKEM_TEMPO_SIDBYTES +
-                         MLKEM_TEMPO_PWDBYTES +
+    const size_t inlen = TEMPO_LEN_SID +
+                         TEMPO_LEN_PWD +
                          MLKEM_SYMBYTES +
                          MLKEM_POLYVECBYTES;
     uint8_t input[inlen];
     size_t i = 0;
-    memcpy(input, sid, MLKEM_TEMPO_SIDBYTES);
-    memcpy(input + (i += MLKEM_TEMPO_SIDBYTES), pwd, MLKEM_TEMPO_PWDBYTES);
-    memcpy(input + (i += MLKEM_TEMPO_PWDBYTES), seed, MLKEM_SYMBYTES);
+    memcpy(input, sid, TEMPO_LEN_SID);
+    memcpy(input + (i += TEMPO_LEN_SID), pwd, TEMPO_LEN_PWD);
+    memcpy(input + (i += TEMPO_LEN_PWD), seed, MLKEM_SYMBYTES);
     memcpy(input + (i += MLKEM_SYMBYTES), v_buf, MLKEM_POLYVECBYTES);
-    mlk_shake256(v_hash, MLKEM_TEMPO_3LAMBDA, input, inlen);
+    mlk_shake256(v_hash, TEMPO_3LAMBDA, input, inlen);
     mlk_zeroize(input, inlen);
 }
 
@@ -110,65 +110,75 @@ static inline void h_confirm(
     const uint8_t *ciphertext,
     const uint8_t *emphemeral_key)
 {
-    const size_t inlen = MLKEM_TEMPO_SIDBYTES +
-                         MLKEM_TEMPO_PWDBYTES +
-                         MLKEM_INDCCA_PUBLICKEYBYTES +
-                         MLKEM_TEMPO_APKBYTES +
-                         MLKEM_INDCCA_CIPHERTEXTBYTES +
+    const size_t inlen = TEMPO_LEN_SID +
+                         TEMPO_LEN_PWD +
+                         MLKEM_INDCCA_LEN_PUBLIC_KEY +
+                         TEMPO_LEN_APK +
+                         MLKEM_INDCCA_LEN_CIPHERTEXT +
                          MLKEM_SSBYTES;
-    const size_t outlen = 2 * MLKEM_TEMPO_TAGBYTES + MLKEM_TEMPO_SSBYTES;
+    const size_t outlen = 2 * TEMPO_LEN_TAG + TEMPO_SSBYTES;
     uint8_t input[inlen];
     uint8_t output[outlen];
     size_t i = 0;
-    memcpy(input, sid, MLKEM_TEMPO_SIDBYTES);
-    memcpy(input + (i += MLKEM_TEMPO_SIDBYTES), pwd, MLKEM_TEMPO_PWDBYTES);
-    memcpy(input + (i += MLKEM_TEMPO_PWDBYTES), public_key, MLKEM_INDCCA_PUBLICKEYBYTES);
-    memcpy(input + (i += MLKEM_INDCCA_PUBLICKEYBYTES), apk, MLKEM_TEMPO_APKBYTES);
-    memcpy(input + (i += MLKEM_TEMPO_APKBYTES), ciphertext, MLKEM_INDCCA_CIPHERTEXTBYTES);
-    memcpy(input + (i += MLKEM_INDCCA_CIPHERTEXTBYTES), emphemeral_key, MLKEM_SSBYTES);
+    memcpy(input, sid, TEMPO_LEN_SID);
+    memcpy(input + (i += TEMPO_LEN_SID), pwd, TEMPO_LEN_PWD);
+    memcpy(input + (i += TEMPO_LEN_PWD), public_key, MLKEM_INDCCA_LEN_PUBLIC_KEY);
+    memcpy(input + (i += MLKEM_INDCCA_LEN_PUBLIC_KEY), apk, TEMPO_LEN_APK);
+    memcpy(input + (i += TEMPO_LEN_APK), ciphertext, MLKEM_INDCCA_LEN_CIPHERTEXT);
+    memcpy(input + (i += MLKEM_INDCCA_LEN_CIPHERTEXT), emphemeral_key, MLKEM_SSBYTES);
     mlk_shake256(output, outlen, input, inlen);
-    memcpy(tag_a, output, MLKEM_TEMPO_TAGBYTES);
-    memcpy(tag_b, output + MLKEM_TEMPO_TAGBYTES, MLKEM_TEMPO_TAGBYTES);
-    memcpy(shared_secret, output + 2 * MLKEM_TEMPO_TAGBYTES, MLKEM_TEMPO_SSBYTES);
+    memcpy(tag_a, output, TEMPO_LEN_TAG);
+    memcpy(tag_b, output + TEMPO_LEN_TAG, TEMPO_LEN_TAG);
+    memcpy(shared_secret, output + 2 * TEMPO_LEN_TAG, TEMPO_SSBYTES);
     mlk_zeroize(input, inlen);
     mlk_zeroize(output, outlen);
 }
 
 MLK_EXTERNAL_API
-void mlk_tempo_keygen(
+int mlk_tempo_keygen(
     uint8_t *public_key,
     uint8_t *secret_key,
     uint8_t *apk,
     const uint8_t *sid,
     const uint8_t *pwd)
 {
-    mlk_kem_keypair(public_key, secret_key);
+    int ret = mlk_kem_keypair(public_key, secret_key) != 0;
+    if (ret != 0)
+    {
+        return ret;
+    }
     uint8_t poly[MLKEM_POLYVECBYTES];
     uint8_t *apk_u = apk;
-    uint8_t *apk_v = apk_u + MLKEM_TEMPO_3LAMBDA;
+    uint8_t *apk_v = apk_u + TEMPO_3LAMBDA;
     uint8_t *apk_seed = apk_v + MLKEM_POLYVECBYTES;
     memcpy(apk_seed, public_key + MLKEM_POLYVECBYTES, MLKEM_SYMBYTES);
     memcpy(poly, public_key, MLKEM_POLYVECBYTES);
-    uint8_t r_seed[MLKEM_TEMPO_3LAMBDA];
-    mlk_randombytes(r_seed, MLKEM_TEMPO_3LAMBDA);
+    uint8_t r_seed[TEMPO_3LAMBDA];
+    if (mlk_randombytes(r_seed, TEMPO_3LAMBDA) != 0)
+    {
+        ret = MLK_ERR_RNG_FAIL;
+        goto cleanup;
+    }
     mlk_polyvec r;
     h_1(&r, sid, pwd, apk_seed, r_seed);
     mlk_polyvec t;
     mlk_polyvec_frombytes(&t, poly);
     mlk_polyvec_add(&t, &r);
     mlk_polyvec_reduce(&t);
-    mlk_polyvec_tobytes(apk + MLKEM_TEMPO_3LAMBDA, &t);
-    uint8_t v_hash[MLKEM_TEMPO_3LAMBDA];
+    mlk_polyvec_tobytes(apk + TEMPO_3LAMBDA, &t);
+    uint8_t v_hash[TEMPO_3LAMBDA];
     h_2(v_hash, sid, pwd, apk_seed, apk_v);
-    for (int i = 0; i < MLKEM_TEMPO_3LAMBDA; i++)
+    for (int i = 0; i < TEMPO_3LAMBDA; i++)
     {
         apk_u[i] = v_hash[i] ^ r_seed[i];
     }
+cleanup:
     mlk_zeroize(&r, sizeof(r));
     mlk_zeroize(&t, sizeof(t));
     mlk_zeroize(poly, sizeof(poly));
     mlk_zeroize(r_seed, sizeof(r_seed));
     mlk_zeroize(v_hash, sizeof(v_hash));
+    return ret;
 }
 
 MLK_EXTERNAL_API
@@ -180,13 +190,13 @@ void mlk_tempo_encaps(
     const uint8_t *pwd,
     const uint8_t *apk)
 {
-    uint8_t v_hash[MLKEM_TEMPO_3LAMBDA];
+    uint8_t v_hash[TEMPO_3LAMBDA];
     const uint8_t *apk_u = apk;
-    const uint8_t *apk_v = apk_u + MLKEM_TEMPO_3LAMBDA;
+    const uint8_t *apk_v = apk_u + TEMPO_3LAMBDA;
     const uint8_t *apk_seed = apk_v + MLKEM_POLYVECBYTES;
     h_2(v_hash, sid, pwd, apk_seed, apk_v);
-    uint8_t r_seed[MLKEM_TEMPO_3LAMBDA];
-    for (int i = 0; i < MLKEM_TEMPO_3LAMBDA; i++)
+    uint8_t r_seed[TEMPO_3LAMBDA];
+    for (int i = 0; i < TEMPO_3LAMBDA; i++)
     {
         r_seed[i] = v_hash[i] ^ apk_u[i];
     }
@@ -203,8 +213,8 @@ void mlk_tempo_encaps(
     mlk_kem_enc(ciphertext, ephemeral_key, public_key);
     mlk_zeroize(&r, sizeof(r));
     mlk_zeroize(&v, sizeof(v));
-    mlk_zeroize(r_seed, MLKEM_TEMPO_3LAMBDA);
-    mlk_zeroize(v_hash, MLKEM_TEMPO_3LAMBDA);
+    mlk_zeroize(r_seed, TEMPO_3LAMBDA);
+    mlk_zeroize(v_hash, TEMPO_3LAMBDA);
     mlk_zeroize(poly, MLKEM_POLYVECBYTES);
 }
 
@@ -244,5 +254,10 @@ void mlk_tempo_confirm(
 MLK_EXTERNAL_API
 int mlk_tempo_verify(const uint8_t *tag, const uint8_t *peer_tag)
 {
-    return CRYPTO_memcmp(tag, peer_tag, MLKEM_TEMPO_TAGBYTES);
+    return mlk_ct_memcmp(tag, peer_tag, TEMPO_LEN_TAG);
 }
+
+#undef h_fls
+#undef h_1
+#undef h_2
+#undef h_confirm

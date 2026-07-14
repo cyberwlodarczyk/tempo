@@ -2,10 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "mlkem_native_all.c"
-#define MLK_CONFIG_CONSTANTS_ONLY
-#include <mlkem_native.h>
-#include "rng/randombytes.h"
+#include "mlkem_native_all.h"
 
 #define CHECK(x)                                                    \
     do                                                              \
@@ -34,15 +31,15 @@ static void print_secret(uint8_t *buf, size_t n)
 
 static int test_keys_mlkem512(void)
 {
-    uint8_t pk[MLKEM512_PUBLICKEYBYTES];
-    uint8_t sk[MLKEM512_SECRETKEYBYTES];
-    uint8_t ct[MLKEM512_CIPHERTEXTBYTES];
-    uint8_t key_a[MLKEM512_BYTES];
-    uint8_t key_b[MLKEM512_BYTES];
+    uint8_t pk[MLKEM512_LEN_PUBLIC_KEY];
+    uint8_t sk[MLKEM512_LEN_SECRET_KEY];
+    uint8_t ct[MLKEM512_LEN_CIPHERTEXT];
+    uint8_t key_a[MLKEM512_LEN_SHARED_SECRET];
+    uint8_t key_b[MLKEM512_LEN_SHARED_SECRET];
     CHECK(mlkem512_keypair(pk, sk) == 0);
     CHECK(mlkem512_enc(ct, key_b, pk) == 0);
     CHECK(mlkem512_dec(key_a, ct, sk) == 0);
-    CHECK(memcmp(key_a, key_b, MLKEM512_BYTES) == 0);
+    CHECK(memcmp(key_a, key_b, MLKEM512_LEN_SHARED_SECRET) == 0);
     print_secret(key_a, sizeof(key_a));
     printf("[MLKEM-512] OK\n");
     return 0;
@@ -50,15 +47,15 @@ static int test_keys_mlkem512(void)
 
 static int test_keys_mlkem768(void)
 {
-    uint8_t pk[MLKEM768_PUBLICKEYBYTES];
-    uint8_t sk[MLKEM768_SECRETKEYBYTES];
-    uint8_t ct[MLKEM768_CIPHERTEXTBYTES];
-    uint8_t key_a[MLKEM768_BYTES];
-    uint8_t key_b[MLKEM768_BYTES];
+    uint8_t pk[MLKEM768_LEN_PUBLIC_KEY];
+    uint8_t sk[MLKEM768_LEN_SECRET_KEY];
+    uint8_t ct[MLKEM768_LEN_CIPHERTEXT];
+    uint8_t key_a[MLKEM768_LEN_SHARED_SECRET];
+    uint8_t key_b[MLKEM768_LEN_SHARED_SECRET];
     CHECK(mlkem768_keypair(pk, sk) == 0);
     CHECK(mlkem768_enc(ct, key_b, pk) == 0);
     CHECK(mlkem768_dec(key_a, ct, sk) == 0);
-    CHECK(memcmp(key_a, key_b, MLKEM768_BYTES) == 0);
+    CHECK(memcmp(key_a, key_b, MLKEM768_LEN_SHARED_SECRET) == 0);
     print_secret(key_a, sizeof(key_a));
     printf("[MLKEM-768] OK\n");
     return 0;
@@ -66,46 +63,46 @@ static int test_keys_mlkem768(void)
 
 static int test_keys_mlkem1024(void)
 {
-    uint8_t pk[MLKEM1024_PUBLICKEYBYTES];
-    uint8_t sk[MLKEM1024_SECRETKEYBYTES];
-    uint8_t ct[MLKEM1024_CIPHERTEXTBYTES];
-    uint8_t key_a[MLKEM1024_BYTES];
-    uint8_t key_b[MLKEM1024_BYTES];
+    uint8_t pk[MLKEM1024_LEN_PUBLIC_KEY];
+    uint8_t sk[MLKEM1024_LEN_SECRET_KEY];
+    uint8_t ct[MLKEM1024_LEN_CIPHERTEXT];
+    uint8_t key_a[MLKEM1024_LEN_SHARED_SECRET];
+    uint8_t key_b[MLKEM1024_LEN_SHARED_SECRET];
     CHECK(mlkem1024_keypair(pk, sk) == 0);
     CHECK(mlkem1024_enc(ct, key_b, pk) == 0);
     CHECK(mlkem1024_dec(key_a, ct, sk) == 0);
-    CHECK(memcmp(key_a, key_b, MLKEM1024_BYTES) == 0);
+    CHECK(memcmp(key_a, key_b, MLKEM1024_LEN_SHARED_SECRET) == 0);
     print_secret(key_a, sizeof(key_a));
     printf("[MLKEM-1024] OK\n");
     return 0;
 }
 
-static int test_keys_mlkem512_tempo(void)
+static int test_keys_tempo512(void)
 {
-    uint8_t sid[MLKEM_TEMPO_SIDBYTES];
-    RAND_bytes(sid, MLKEM_TEMPO_SIDBYTES);
-    uint8_t pwd[MLKEM_TEMPO_PWDBYTES];
-    RAND_bytes(sid, MLKEM_TEMPO_PWDBYTES);
-    uint8_t public_key_a[MLKEM512_PUBLICKEYBYTES];
-    uint8_t secret_key[MLKEM512_SECRETKEYBYTES];
-    uint8_t apk[MLKEM512_TEMPO_APKBYTES];
-    mlkem512_tempo_keygen(public_key_a, secret_key, apk, sid, pwd);
-    uint8_t public_key_b[MLKEM512_PUBLICKEYBYTES];
-    uint8_t ciphertext[MLKEM512_CIPHERTEXTBYTES];
-    uint8_t ephemeral_key_b[MLKEM_BYTES];
-    mlkem512_tempo_encaps(
+    uint8_t sid[TEMPO_LEN_SID];
+    RAND_priv_bytes(sid, TEMPO_LEN_SID);
+    uint8_t pwd[TEMPO_LEN_PWD];
+    RAND_priv_bytes(sid, TEMPO_LEN_PWD);
+    uint8_t public_key_a[TEMPO512_LEN_PUBLIC_KEY];
+    uint8_t secret_key[TEMPO512_LEN_SECRET_KEY];
+    uint8_t apk[TEMPO512_LEN_APK];
+    tempo512_keygen(public_key_a, secret_key, apk, sid, pwd);
+    uint8_t public_key_b[TEMPO512_LEN_PUBLIC_KEY];
+    uint8_t ciphertext[TEMPO512_LEN_CIPHERTEXT];
+    uint8_t ephemeral_key_b[TEMPO512_LEN_EPHEMERAL_KEY];
+    tempo512_encaps(
         public_key_b,
         ciphertext,
         ephemeral_key_b,
         sid,
         pwd,
         apk);
-    uint8_t ephemeral_key_a[MLKEM_BYTES];
-    mlkem512_tempo_decaps(ephemeral_key_a, secret_key, ciphertext);
-    uint8_t tag_a_a[MLKEM512_TEMPO_TAGBYTES];
-    uint8_t tag_b_a[MLKEM512_TEMPO_TAGBYTES];
-    uint8_t shared_secret_a[MLKEM512_TEMPO_BYTES];
-    mlkem512_tempo_confirm(
+    uint8_t ephemeral_key_a[TEMPO512_LEN_EPHEMERAL_KEY];
+    tempo512_decaps(ephemeral_key_a, secret_key, ciphertext);
+    uint8_t tag_a_a[TEMPO512_LEN_TAG];
+    uint8_t tag_b_a[TEMPO512_LEN_TAG];
+    uint8_t shared_secret_a[TEMPO512_LEN_SHARED_SECRET];
+    tempo512_confirm(
         tag_a_a,
         tag_b_a,
         shared_secret_a,
@@ -115,10 +112,10 @@ static int test_keys_mlkem512_tempo(void)
         ciphertext,
         public_key_a,
         ephemeral_key_a);
-    uint8_t tag_a_b[MLKEM512_TEMPO_TAGBYTES];
-    uint8_t tag_b_b[MLKEM512_TEMPO_TAGBYTES];
-    uint8_t shared_secret_b[MLKEM512_TEMPO_BYTES];
-    mlkem512_tempo_confirm(
+    uint8_t tag_a_b[TEMPO512_LEN_TAG];
+    uint8_t tag_b_b[TEMPO512_LEN_TAG];
+    uint8_t shared_secret_b[TEMPO512_LEN_SHARED_SECRET];
+    tempo512_confirm(
         tag_a_b,
         tag_b_b,
         shared_secret_b,
@@ -128,40 +125,40 @@ static int test_keys_mlkem512_tempo(void)
         ciphertext,
         public_key_b,
         ephemeral_key_b);
-    CHECK(mlkem512_tempo_verify(tag_a_a, tag_a_b) == 0);
-    CHECK(mlkem512_tempo_verify(tag_a_a, tag_a_b) == 0);
-    CHECK(memcmp(shared_secret_a, shared_secret_b, MLKEM512_TEMPO_BYTES) == 0);
+    CHECK(tempo512_verify(tag_a_a, tag_a_b) == 0);
+    CHECK(tempo512_verify(tag_a_a, tag_a_b) == 0);
+    CHECK(memcmp(shared_secret_a, shared_secret_b, TEMPO512_LEN_SHARED_SECRET) == 0);
     print_secret(shared_secret_a, sizeof(shared_secret_a));
-    printf("[MLKEM-512-TEMPO] OK\n");
+    printf("[TEMPO-512] OK\n");
     return 0;
 }
 
-static int test_keys_mlkem768_tempo(void)
+static int test_keys_tempo768(void)
 {
-    uint8_t sid[MLKEM_TEMPO_SIDBYTES];
-    RAND_bytes(sid, MLKEM_TEMPO_SIDBYTES);
-    uint8_t pwd[MLKEM_TEMPO_PWDBYTES];
-    RAND_bytes(sid, MLKEM_TEMPO_PWDBYTES);
-    uint8_t public_key_a[MLKEM768_PUBLICKEYBYTES];
-    uint8_t secret_key[MLKEM768_SECRETKEYBYTES];
-    uint8_t apk[MLKEM768_TEMPO_APKBYTES];
-    mlkem768_tempo_keygen(public_key_a, secret_key, apk, sid, pwd);
-    uint8_t public_key_b[MLKEM768_PUBLICKEYBYTES];
-    uint8_t ciphertext[MLKEM768_CIPHERTEXTBYTES];
-    uint8_t ephemeral_key_b[MLKEM_BYTES];
-    mlkem768_tempo_encaps(
+    uint8_t sid[TEMPO_LEN_SID];
+    RAND_priv_bytes(sid, TEMPO_LEN_SID);
+    uint8_t pwd[TEMPO_LEN_PWD];
+    RAND_priv_bytes(sid, TEMPO_LEN_PWD);
+    uint8_t public_key_a[TEMPO768_LEN_PUBLIC_KEY];
+    uint8_t secret_key[TEMPO768_LEN_SECRET_KEY];
+    uint8_t apk[TEMPO768_LEN_APK];
+    tempo768_keygen(public_key_a, secret_key, apk, sid, pwd);
+    uint8_t public_key_b[TEMPO768_LEN_PUBLIC_KEY];
+    uint8_t ciphertext[TEMPO768_LEN_CIPHERTEXT];
+    uint8_t ephemeral_key_b[TEMPO768_LEN_EPHEMERAL_KEY];
+    tempo768_encaps(
         public_key_b,
         ciphertext,
         ephemeral_key_b,
         sid,
         pwd,
         apk);
-    uint8_t ephemeral_key_a[MLKEM_BYTES];
-    mlkem768_tempo_decaps(ephemeral_key_a, secret_key, ciphertext);
-    uint8_t tag_a_a[MLKEM768_TEMPO_TAGBYTES];
-    uint8_t tag_b_a[MLKEM768_TEMPO_TAGBYTES];
-    uint8_t shared_secret_a[MLKEM768_TEMPO_BYTES];
-    mlkem768_tempo_confirm(
+    uint8_t ephemeral_key_a[TEMPO768_LEN_EPHEMERAL_KEY];
+    tempo768_decaps(ephemeral_key_a, secret_key, ciphertext);
+    uint8_t tag_a_a[TEMPO768_LEN_TAG];
+    uint8_t tag_b_a[TEMPO768_LEN_TAG];
+    uint8_t shared_secret_a[TEMPO768_LEN_SHARED_SECRET];
+    tempo768_confirm(
         tag_a_a,
         tag_b_a,
         shared_secret_a,
@@ -171,10 +168,10 @@ static int test_keys_mlkem768_tempo(void)
         ciphertext,
         public_key_a,
         ephemeral_key_a);
-    uint8_t tag_a_b[MLKEM768_TEMPO_TAGBYTES];
-    uint8_t tag_b_b[MLKEM768_TEMPO_TAGBYTES];
-    uint8_t shared_secret_b[MLKEM768_TEMPO_BYTES];
-    mlkem768_tempo_confirm(
+    uint8_t tag_a_b[TEMPO768_LEN_TAG];
+    uint8_t tag_b_b[TEMPO768_LEN_TAG];
+    uint8_t shared_secret_b[TEMPO768_LEN_SHARED_SECRET];
+    tempo768_confirm(
         tag_a_b,
         tag_b_b,
         shared_secret_b,
@@ -184,40 +181,40 @@ static int test_keys_mlkem768_tempo(void)
         ciphertext,
         public_key_b,
         ephemeral_key_b);
-    CHECK(mlkem768_tempo_verify(tag_a_a, tag_a_b) == 0);
-    CHECK(mlkem768_tempo_verify(tag_a_a, tag_a_b) == 0);
-    CHECK(memcmp(shared_secret_a, shared_secret_b, MLKEM768_TEMPO_BYTES) == 0);
+    CHECK(tempo768_verify(tag_a_a, tag_a_b) == 0);
+    CHECK(tempo768_verify(tag_a_a, tag_a_b) == 0);
+    CHECK(memcmp(shared_secret_a, shared_secret_b, TEMPO768_LEN_SHARED_SECRET) == 0);
     print_secret(shared_secret_a, sizeof(shared_secret_a));
-    printf("[MLKEM-768-TEMPO] OK\n");
+    printf("[TEMPO-768] OK\n");
     return 0;
 }
 
-static int test_keys_mlkem1024_tempo(void)
+static int test_keys_tempo1024(void)
 {
-    uint8_t sid[MLKEM_TEMPO_SIDBYTES];
-    RAND_bytes(sid, MLKEM_TEMPO_SIDBYTES);
-    uint8_t pwd[MLKEM_TEMPO_PWDBYTES];
-    RAND_bytes(sid, MLKEM_TEMPO_PWDBYTES);
-    uint8_t public_key_a[MLKEM1024_PUBLICKEYBYTES];
-    uint8_t secret_key[MLKEM1024_SECRETKEYBYTES];
-    uint8_t apk[MLKEM1024_TEMPO_APKBYTES];
-    mlkem1024_tempo_keygen(public_key_a, secret_key, apk, sid, pwd);
-    uint8_t public_key_b[MLKEM1024_PUBLICKEYBYTES];
-    uint8_t ciphertext[MLKEM1024_CIPHERTEXTBYTES];
-    uint8_t ephemeral_key_b[MLKEM_BYTES];
-    mlkem1024_tempo_encaps(
+    uint8_t sid[TEMPO_LEN_SID];
+    RAND_priv_bytes(sid, TEMPO_LEN_SID);
+    uint8_t pwd[TEMPO_LEN_PWD];
+    RAND_priv_bytes(sid, TEMPO_LEN_PWD);
+    uint8_t public_key_a[TEMPO1024_LEN_PUBLIC_KEY];
+    uint8_t secret_key[TEMPO1024_LEN_SECRET_KEY];
+    uint8_t apk[TEMPO1024_LEN_APK];
+    tempo1024_keygen(public_key_a, secret_key, apk, sid, pwd);
+    uint8_t public_key_b[TEMPO1024_LEN_PUBLIC_KEY];
+    uint8_t ciphertext[TEMPO1024_LEN_CIPHERTEXT];
+    uint8_t ephemeral_key_b[TEMPO1024_LEN_EPHEMERAL_KEY];
+    tempo1024_encaps(
         public_key_b,
         ciphertext,
         ephemeral_key_b,
         sid,
         pwd,
         apk);
-    uint8_t ephemeral_key_a[MLKEM_BYTES];
-    mlkem1024_tempo_decaps(ephemeral_key_a, secret_key, ciphertext);
-    uint8_t tag_a_a[MLKEM1024_TEMPO_TAGBYTES];
-    uint8_t tag_b_a[MLKEM1024_TEMPO_TAGBYTES];
-    uint8_t shared_secret_a[MLKEM1024_TEMPO_BYTES];
-    mlkem1024_tempo_confirm(
+    uint8_t ephemeral_key_a[TEMPO1024_LEN_EPHEMERAL_KEY];
+    tempo1024_decaps(ephemeral_key_a, secret_key, ciphertext);
+    uint8_t tag_a_a[TEMPO1024_LEN_TAG];
+    uint8_t tag_b_a[TEMPO1024_LEN_TAG];
+    uint8_t shared_secret_a[TEMPO1024_LEN_SHARED_SECRET];
+    tempo1024_confirm(
         tag_a_a,
         tag_b_a,
         shared_secret_a,
@@ -227,10 +224,10 @@ static int test_keys_mlkem1024_tempo(void)
         ciphertext,
         public_key_a,
         ephemeral_key_a);
-    uint8_t tag_a_b[MLKEM1024_TEMPO_TAGBYTES];
-    uint8_t tag_b_b[MLKEM1024_TEMPO_TAGBYTES];
-    uint8_t shared_secret_b[MLKEM1024_TEMPO_BYTES];
-    mlkem1024_tempo_confirm(
+    uint8_t tag_a_b[TEMPO1024_LEN_TAG];
+    uint8_t tag_b_b[TEMPO1024_LEN_TAG];
+    uint8_t shared_secret_b[TEMPO1024_LEN_SHARED_SECRET];
+    tempo1024_confirm(
         tag_a_b,
         tag_b_b,
         shared_secret_b,
@@ -240,11 +237,11 @@ static int test_keys_mlkem1024_tempo(void)
         ciphertext,
         public_key_b,
         ephemeral_key_b);
-    CHECK(mlkem1024_tempo_verify(tag_a_a, tag_a_b) == 0);
-    CHECK(mlkem1024_tempo_verify(tag_a_a, tag_a_b) == 0);
-    CHECK(memcmp(shared_secret_a, shared_secret_b, MLKEM1024_TEMPO_BYTES) == 0);
+    CHECK(tempo1024_verify(tag_a_a, tag_a_b) == 0);
+    CHECK(tempo1024_verify(tag_a_a, tag_a_b) == 0);
+    CHECK(memcmp(shared_secret_a, shared_secret_b, TEMPO1024_LEN_SHARED_SECRET) == 0);
     print_secret(shared_secret_a, sizeof(shared_secret_a));
-    printf("[MLKEM-1024-TEMPO] OK\n");
+    printf("[TEMPO-1024] OK\n");
     return 0;
 }
 
@@ -262,15 +259,15 @@ int main(void)
     {
         return 1;
     }
-    if (test_keys_mlkem512_tempo() != 0)
+    if (test_keys_tempo512() != 0)
     {
         return 1;
     }
-    if (test_keys_mlkem768_tempo() != 0)
+    if (test_keys_tempo768() != 0)
     {
         return 1;
     }
-    if (test_keys_mlkem1024_tempo() != 0)
+    if (test_keys_tempo1024() != 0)
     {
         return 1;
     }

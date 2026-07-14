@@ -53,9 +53,9 @@ void mlk_gen_matrix(mlk_polymat *a, const uint8_t seed[MLKEM_SYMBYTES],
  *              public-key encryption scheme underlying ML-KEM
  *
  * Arguments:   - uint8_t *pk: pointer to output public key
- *                             (of length MLKEM_INDCPA_PUBLICKEYBYTES bytes)
+ *                             (of length MLKEM_INDCPA_LEN_PUBLIC_KEY bytes)
  *              - uint8_t *sk: pointer to output private key
- *                             (of length MLKEM_INDCPA_SECRETKEYBYTES bytes)
+ *                             (of length MLKEM_INDCPA_LEN_SECRET_KEY bytes)
  *              - const uint8_t *coins: pointer to input randomness
  *                             (of length MLKEM_SYMBYTES bytes)
  *
@@ -63,13 +63,13 @@ void mlk_gen_matrix(mlk_polymat *a, const uint8_t seed[MLKEM_SYMBYTES],
  *
  **************************************************/
 MLK_INTERNAL_API
-void mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
-                               uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
+void mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_LEN_PUBLIC_KEY],
+                               uint8_t sk[MLKEM_INDCPA_LEN_SECRET_KEY],
                                const uint8_t coins[MLKEM_SYMBYTES])
     __contract__(
-        requires(memory_no_alias(pk, MLKEM_INDCPA_PUBLICKEYBYTES)) requires(memory_no_alias(sk, MLKEM_INDCPA_SECRETKEYBYTES)) requires(memory_no_alias(coins, MLKEM_SYMBYTES))
-            assigns(memory_slice(pk, MLKEM_INDCPA_PUBLICKEYBYTES))
-                assigns(memory_slice(sk, MLKEM_INDCPA_SECRETKEYBYTES))
+        requires(memory_no_alias(pk, MLKEM_INDCPA_LEN_PUBLIC_KEY)) requires(memory_no_alias(sk, MLKEM_INDCPA_LEN_SECRET_KEY)) requires(memory_no_alias(coins, MLKEM_SYMBYTES))
+            assigns(memory_slice(pk, MLKEM_INDCPA_LEN_PUBLIC_KEY))
+                assigns(memory_slice(sk, MLKEM_INDCPA_LEN_SECRET_KEY))
                     ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
                             return_value == MLK_ERR_RNG_FAIL));
 
@@ -85,7 +85,7 @@ void mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
  *              - const uint8_t *m: pointer to input message
  *                                  (of length MLKEM_INDCPA_MSGBYTES bytes)
  *              - const uint8_t *pk: pointer to input public key
- *                                   (of length MLKEM_INDCPA_PUBLICKEYBYTES)
+ *                                   (of length MLKEM_INDCPA_LEN_PUBLIC_KEY)
  *              - const uint8_t *coins: pointer to input random coins used as
  *                 seed (of length MLKEM_SYMBYTES) to deterministically generate
  *                 all randomness
@@ -97,10 +97,10 @@ MLK_INTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
                    const uint8_t m[MLKEM_INDCPA_MSGBYTES],
-                   const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
+                   const uint8_t pk[MLKEM_INDCPA_LEN_PUBLIC_KEY],
                    const uint8_t coins[MLKEM_SYMBYTES])
     __contract__(
-        requires(memory_no_alias(c, MLKEM_INDCPA_BYTES)) requires(memory_no_alias(m, MLKEM_INDCPA_MSGBYTES)) requires(memory_no_alias(pk, MLKEM_INDCPA_PUBLICKEYBYTES)) requires(memory_no_alias(coins, MLKEM_SYMBYTES))
+        requires(memory_no_alias(c, MLKEM_INDCPA_BYTES)) requires(memory_no_alias(m, MLKEM_INDCPA_MSGBYTES)) requires(memory_no_alias(pk, MLKEM_INDCPA_LEN_PUBLIC_KEY)) requires(memory_no_alias(coins, MLKEM_SYMBYTES))
             assigns(memory_slice(c, MLKEM_INDCPA_BYTES))
                 ensures(return_value == 0 || return_value == MLK_ERR_FAIL));
 
@@ -116,7 +116,7 @@ int mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
  *              - const uint8_t *c: pointer to input ciphertext
  *                                  (of length MLKEM_INDCPA_BYTES)
  *              - const uint8_t *sk: pointer to input secret key
- *                                   (of length MLKEM_INDCPA_SECRETKEYBYTES)
+ *                                   (of length MLKEM_INDCPA_LEN_SECRET_KEY)
  *
  * Specification: Implements @[FIPS203, Algorithm 15 (K-PKE.Decrypt)].
  *
@@ -125,9 +125,9 @@ MLK_INTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int mlk_indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
                    const uint8_t c[MLKEM_INDCPA_BYTES],
-                   const uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES])
+                   const uint8_t sk[MLKEM_INDCPA_LEN_SECRET_KEY])
     __contract__(
-        requires(memory_no_alias(c, MLKEM_INDCPA_BYTES)) requires(memory_no_alias(m, MLKEM_INDCPA_MSGBYTES)) requires(memory_no_alias(sk, MLKEM_INDCPA_SECRETKEYBYTES))
+        requires(memory_no_alias(c, MLKEM_INDCPA_BYTES)) requires(memory_no_alias(m, MLKEM_INDCPA_MSGBYTES)) requires(memory_no_alias(sk, MLKEM_INDCPA_LEN_SECRET_KEY))
             assigns(memory_slice(m, MLKEM_INDCPA_MSGBYTES))
                 ensures(return_value == 0 || return_value == MLK_ERR_FAIL));
 

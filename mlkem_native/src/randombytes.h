@@ -5,7 +5,6 @@
 #ifndef MLK_RANDOMBYTES_H
 #define MLK_RANDOMBYTES_H
 
-
 #include "cbmc.h"
 #include "common.h"
 
@@ -30,7 +29,7 @@
  *              On failure, top-level APIs return MLK_ERR_RNG_FAIL.
  *
  **************************************************/
-int randombytes(uint8_t *out, size_t outlen);
+// int randombytes(uint8_t *out, size_t outlen);
 
 /*************************************************
  * Name:        mlk_randombytes
@@ -50,11 +49,14 @@ int randombytes(uint8_t *out, size_t outlen);
  *              On failure, top-level APIs return MLK_ERR_RNG_FAIL.
  *
  **************************************************/
+#define mlk_randombytes MLK_NAMESPACE(randombytes)
+MLK_INTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-static MLK_INLINE int mlk_randombytes(uint8_t *out, size_t outlen)
-__contract__(
-  requires(memory_no_alias(out, outlen))
-  assigns(memory_slice(out, outlen))) { return randombytes(out, outlen); }
+int mlk_randombytes(uint8_t *out, size_t outlen)
+    __contract__(
+        requires(memory_no_alias(out, outlen))
+            assigns(memory_slice(out, outlen))); /* { return randombytes(out, outlen); } */
+
 #endif /* !MLK_CONFIG_CUSTOM_RANDOMBYTES */
 #endif /* !MLK_CONFIG_NO_RANDOMIZED_API */
 #endif /* !MLK_RANDOMBYTES_H */

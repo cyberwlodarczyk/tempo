@@ -29,18 +29,18 @@
  * and external mlkem_native.h. */
 #include "mlkem_native.h"
 
-#if MLKEM_INDCCA_SECRETKEYBYTES != \
-    MLKEM_SECRETKEYBYTES(MLK_CONFIG_PARAMETER_SET)
+#if MLKEM_INDCCA_LEN_SECRET_KEY != \
+    MLKEM_LEN_SECRET_KEY(MLK_CONFIG_PARAMETER_SET)
 #error Mismatch for SECRETKEYBYTES between kem.h and mlkem_native.h
 #endif
 
-#if MLKEM_INDCCA_PUBLICKEYBYTES != \
-    MLKEM_PUBLICKEYBYTES(MLK_CONFIG_PARAMETER_SET)
+#if MLKEM_INDCCA_LEN_PUBLIC_KEY != \
+    MLKEM_LEN_PUBLIC_KEY(MLK_CONFIG_PARAMETER_SET)
 #error Mismatch for PUBLICKEYBYTES between kem.h and mlkem_native.h
 #endif
 
-#if MLKEM_INDCCA_CIPHERTEXTBYTES != \
-    MLKEM_CIPHERTEXTBYTES(MLK_CONFIG_PARAMETER_SET)
+#if MLKEM_INDCCA_LEN_CIPHERTEXT != \
+    MLKEM_LEN_CIPHERTEXT(MLK_CONFIG_PARAMETER_SET)
 #error Mismatch for CIPHERTEXTBYTES between kem.h and mlkem_native.h
 #endif
 
@@ -61,7 +61,7 @@
  *              i.e., ensures that coefficients are in [0,q-1].
  *
  * Arguments:   - const uint8_t *pk: pointer to input public key
- *                (an already allocated array of MLKEM_INDCCA_PUBLICKEYBYTES
+ *                (an already allocated array of MLKEM_INDCCA_LEN_PUBLIC_KEY
  *                 bytes)
  *
  * Returns: - 0 on success
@@ -74,9 +74,9 @@
 /* Reference: Not implemented in the reference implementation @[REF]. */
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int mlk_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
+int mlk_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_LEN_PUBLIC_KEY])
     __contract__(
-        requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
+        requires(memory_no_alias(pk, MLKEM_INDCCA_LEN_PUBLIC_KEY))
             ensures(return_value == 0 || return_value == MLK_ERR_FAIL));
 
 /*************************************************
@@ -87,7 +87,7 @@ int mlk_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
  *              sk[768𝑘+32 ∶ 768𝑘+64] = H(pk)= H(sk[384𝑘 : 768𝑘+32])
  *
  * Arguments:   - const uint8_t *sk: pointer to input private key
- *                (an already allocated array of MLKEM_INDCCA_SECRETKEYBYTES
+ *                (an already allocated array of MLKEM_INDCCA_LEN_SECRET_KEY
  *                 bytes)
  *
  * Returns: - 0 on success
@@ -100,9 +100,9 @@ int mlk_kem_check_pk(const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
 /* Reference: Not implemented in the reference implementation @[REF]. */
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int mlk_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
+int mlk_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_LEN_SECRET_KEY])
     __contract__(
-        requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
+        requires(memory_no_alias(sk, MLKEM_INDCCA_LEN_SECRET_KEY))
             ensures(return_value == 0 || return_value == MLK_ERR_FAIL));
 
 /*************************************************
@@ -112,10 +112,10 @@ int mlk_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
  *              for CCA-secure ML-KEM key encapsulation mechanism
  *
  * Arguments:   - uint8_t *pk: pointer to output public key
- *                (an already allocated array of MLKEM_INDCCA_PUBLICKEYBYTES
+ *                (an already allocated array of MLKEM_INDCCA_LEN_PUBLIC_KEY
  *                 bytes)
  *              - uint8_t *sk: pointer to output private key
- *                (an already allocated array of MLKEM_INDCCA_SECRETKEYBYTES
+ *                (an already allocated array of MLKEM_INDCCA_LEN_SECRET_KEY
  *                 bytes)
  *              - uint8_t *coins: pointer to input randomness
  *                (an already allocated array filled with 2*MLKEM_SYMBYTES
@@ -130,13 +130,13 @@ int mlk_kem_check_sk(const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
  **************************************************/
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int mlk_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                           uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES],
+int mlk_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_LEN_PUBLIC_KEY],
+                           uint8_t sk[MLKEM_INDCCA_LEN_SECRET_KEY],
                            const uint8_t coins[2 * MLKEM_SYMBYTES])
     __contract__(
-        requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES)) requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES)) requires(memory_no_alias(coins, 2 * MLKEM_SYMBYTES))
-            assigns(memory_slice(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
-                assigns(memory_slice(sk, MLKEM_INDCCA_SECRETKEYBYTES))
+        requires(memory_no_alias(pk, MLKEM_INDCCA_LEN_PUBLIC_KEY)) requires(memory_no_alias(sk, MLKEM_INDCCA_LEN_SECRET_KEY)) requires(memory_no_alias(coins, 2 * MLKEM_SYMBYTES))
+            assigns(memory_slice(pk, MLKEM_INDCCA_LEN_PUBLIC_KEY))
+                assigns(memory_slice(sk, MLKEM_INDCCA_LEN_SECRET_KEY))
                     ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
                             return_value == MLK_ERR_RNG_FAIL));
 
@@ -147,10 +147,10 @@ int mlk_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
  *              for CCA-secure ML-KEM key encapsulation mechanism
  *
  * Arguments:   - uint8_t *pk: pointer to output public key
- *                (an already allocated array of MLKEM_INDCCA_PUBLICKEYBYTES
+ *                (an already allocated array of MLKEM_INDCCA_LEN_PUBLIC_KEY
  *                 bytes)
  *              - uint8_t *sk: pointer to output private key
- *                (an already allocated array of MLKEM_INDCCA_SECRETKEYBYTES
+ *                (an already allocated array of MLKEM_INDCCA_LEN_SECRET_KEY
  *                 bytes)
  *
  * Returns:     - 0: On success
@@ -162,12 +162,13 @@ int mlk_kem_keypair_derand(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
  *
  **************************************************/
 MLK_EXTERNAL_API
-int mlk_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
-                    uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_kem_keypair(uint8_t pk[MLKEM_INDCCA_LEN_PUBLIC_KEY],
+                    uint8_t sk[MLKEM_INDCCA_LEN_SECRET_KEY])
     __contract__(
-        requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES)) requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
-            assigns(memory_slice(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
-                assigns(memory_slice(sk, MLKEM_INDCCA_SECRETKEYBYTES))
+        requires(memory_no_alias(pk, MLKEM_INDCCA_LEN_PUBLIC_KEY)) requires(memory_no_alias(sk, MLKEM_INDCCA_LEN_SECRET_KEY))
+            assigns(memory_slice(pk, MLKEM_INDCCA_LEN_PUBLIC_KEY))
+                assigns(memory_slice(sk, MLKEM_INDCCA_LEN_SECRET_KEY))
                     ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
                             return_value == MLK_ERR_RNG_FAIL));
 
@@ -178,12 +179,12 @@ int mlk_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
  *              secret for given public key
  *
  * Arguments:   - uint8_t *ct: pointer to output cipher text
- *                (an already allocated array of MLKEM_INDCCA_CIPHERTEXTBYTES
+ *                (an already allocated array of MLKEM_INDCCA_LEN_CIPHERTEXT
  *                 bytes)
  *              - uint8_t *ss: pointer to output shared secret
  *                (an already allocated array of MLKEM_SSBYTES bytes)
  *              - const uint8_t *pk: pointer to input public key
- *                (an already allocated array of MLKEM_INDCCA_PUBLICKEYBYTES
+ *                (an already allocated array of MLKEM_INDCCA_LEN_PUBLIC_KEY
  *                 bytes)
  *              - const uint8_t *coins: pointer to input randomness
  *                (an already allocated array filled with MLKEM_SYMBYTES random
@@ -198,13 +199,13 @@ int mlk_kem_keypair(uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
  **************************************************/
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
-int mlk_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
+int mlk_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_LEN_CIPHERTEXT],
                        uint8_t ss[MLKEM_SSBYTES],
-                       const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES],
+                       const uint8_t pk[MLKEM_INDCCA_LEN_PUBLIC_KEY],
                        const uint8_t coins[MLKEM_SYMBYTES])
     __contract__(
-        requires(memory_no_alias(ct, MLKEM_INDCCA_CIPHERTEXTBYTES)) requires(memory_no_alias(ss, MLKEM_SSBYTES)) requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES)) requires(memory_no_alias(coins, MLKEM_SYMBYTES))
-            assigns(memory_slice(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
+        requires(memory_no_alias(ct, MLKEM_INDCCA_LEN_CIPHERTEXT)) requires(memory_no_alias(ss, MLKEM_SSBYTES)) requires(memory_no_alias(pk, MLKEM_INDCCA_LEN_PUBLIC_KEY)) requires(memory_no_alias(coins, MLKEM_SYMBYTES))
+            assigns(memory_slice(ct, MLKEM_INDCCA_LEN_CIPHERTEXT))
                 assigns(memory_slice(ss, MLKEM_SSBYTES))
                     ensures(return_value == 0 || return_value == MLK_ERR_FAIL));
 
@@ -215,12 +216,12 @@ int mlk_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
  *              secret for given public key
  *
  * Arguments:   - uint8_t *ct: pointer to output cipher text
- *                (an already allocated array of MLKEM_INDCCA_CIPHERTEXTBYTES
+ *                (an already allocated array of MLKEM_INDCCA_LEN_CIPHERTEXT
  *                 bytes)
  *              - uint8_t *ss: pointer to output shared secret
  *                (an already allocated array of MLKEM_SSBYTES bytes)
  *              - const uint8_t *pk: pointer to input public key
- *                (an already allocated array of MLKEM_INDCCA_PUBLICKEYBYTES
+ *                (an already allocated array of MLKEM_INDCCA_LEN_PUBLIC_KEY
  *                 bytes)
  *
  * Returns: - 0 on success
@@ -232,12 +233,12 @@ int mlk_kem_enc_derand(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
  *
  **************************************************/
 MLK_EXTERNAL_API
-int mlk_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
+int mlk_kem_enc(uint8_t ct[MLKEM_INDCCA_LEN_CIPHERTEXT],
                 uint8_t ss[MLKEM_SSBYTES],
-                const uint8_t pk[MLKEM_INDCCA_PUBLICKEYBYTES])
+                const uint8_t pk[MLKEM_INDCCA_LEN_PUBLIC_KEY])
     __contract__(
-        requires(memory_no_alias(ct, MLKEM_INDCCA_CIPHERTEXTBYTES)) requires(memory_no_alias(ss, MLKEM_SSBYTES)) requires(memory_no_alias(pk, MLKEM_INDCCA_PUBLICKEYBYTES))
-            assigns(memory_slice(ct, MLKEM_INDCCA_CIPHERTEXTBYTES))
+        requires(memory_no_alias(ct, MLKEM_INDCCA_LEN_CIPHERTEXT)) requires(memory_no_alias(ss, MLKEM_SSBYTES)) requires(memory_no_alias(pk, MLKEM_INDCCA_LEN_PUBLIC_KEY))
+            assigns(memory_slice(ct, MLKEM_INDCCA_LEN_CIPHERTEXT))
                 assigns(memory_slice(ss, MLKEM_SSBYTES))
                     ensures(return_value == 0 || return_value == MLK_ERR_FAIL ||
                             return_value == MLK_ERR_RNG_FAIL));
@@ -251,10 +252,10 @@ int mlk_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
  * Arguments:   - uint8_t *ss: pointer to output shared secret
  *                (an already allocated array of MLKEM_SSBYTES bytes)
  *              - const uint8_t *ct: pointer to input cipher text
- *                (an already allocated array of MLKEM_INDCCA_CIPHERTEXTBYTES
+ *                (an already allocated array of MLKEM_INDCCA_LEN_CIPHERTEXT
  *                 bytes)
  *              - const uint8_t *sk: pointer to input private key
- *                (an already allocated array of MLKEM_INDCCA_SECRETKEYBYTES
+ *                (an already allocated array of MLKEM_INDCCA_LEN_SECRET_KEY
  *                 bytes)
  *
  * Returns: - 0 on success
@@ -266,10 +267,10 @@ int mlk_kem_enc(uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
  **************************************************/
 MLK_EXTERNAL_API
 int mlk_kem_dec(uint8_t ss[MLKEM_SSBYTES],
-                const uint8_t ct[MLKEM_INDCCA_CIPHERTEXTBYTES],
-                const uint8_t sk[MLKEM_INDCCA_SECRETKEYBYTES])
+                const uint8_t ct[MLKEM_INDCCA_LEN_CIPHERTEXT],
+                const uint8_t sk[MLKEM_INDCCA_LEN_SECRET_KEY])
     __contract__(
-        requires(memory_no_alias(ss, MLKEM_SSBYTES)) requires(memory_no_alias(ct, MLKEM_INDCCA_CIPHERTEXTBYTES)) requires(memory_no_alias(sk, MLKEM_INDCCA_SECRETKEYBYTES))
+        requires(memory_no_alias(ss, MLKEM_SSBYTES)) requires(memory_no_alias(ct, MLKEM_INDCCA_LEN_CIPHERTEXT)) requires(memory_no_alias(sk, MLKEM_INDCCA_LEN_SECRET_KEY))
             assigns(memory_slice(ss, MLKEM_SSBYTES))
                 ensures(return_value == 0 || return_value == MLK_ERR_FAIL));
 

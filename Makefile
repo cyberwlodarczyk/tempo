@@ -41,13 +41,13 @@ include auto.mk
 #
 # Append cross-prefix for cross compilation
 # When called from the root Makefile, CROSS_PREFIX has already been added here
-ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
-CC  := $(CROSS_PREFIX)$(CC)
-endif
+# ifeq (,$(findstring $(CROSS_PREFIX),$(CC)))
+# CC  := $(CROSS_PREFIX)$(CC)
+# endif
 
-ifeq (,$(findstring $(CROSS_PREFIX),$(AR)))
-AR  := $(CROSS_PREFIX)$(AR)
-endif
+# ifeq (,$(findstring $(CROSS_PREFIX),$(AR)))
+# AR  := $(CROSS_PREFIX)$(AR)
+# endif
 
 # Part A:
 #
@@ -55,9 +55,10 @@ endif
 #
 # Here, the monolithic C file for mlkem-native is directly included in main.c,
 # However, we still need to incldue the monolithic assembly file.
+MLK_SOURCE_C = mlkem_native_all.c
 MLK_SOURCE_ASM = mlkem_native/mlkem_native_asm.S
-
 INC=-Imlkem_native/ -I./
+LIB=-lcrypto
 
 # Part B:
 #
@@ -69,15 +70,15 @@ INC=-Imlkem_native/ -I./
 # You MUST NOT use this implementation outside of testing.
 #
 # !!! WARNING !!!
-RNG_SOURCE=$(wildcard rng/*.c)
+# RNG_SOURCE=$(wildcard rng/*.c)
 
 # Part C:
 #
 # Your application source code
-APP_SOURCE=$(RNG_SOURCE) main.c
+APP_SOURCE=main.c
 
 BUILD_DIR=build
-BIN=test_binary
+BIN=main
 
 #
 # Configuration adjustments
@@ -102,10 +103,10 @@ $(BUILD_DIR)/%.S.o: %.S
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	$(Q)$(CC) -c $(CFLAGS) $(ASMFLAGS) $(INC) $^ -o $@
 
-$(BINARY_NAME_FULL): $(APP_SOURCE) $(MLK_OBJ_ASM)
+$(BINARY_NAME_FULL): $(APP_SOURCE) $(MLK_OBJ_C) $(MLK_OBJ_ASM)
 	$(Q)echo "CC  $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC) $(CFLAGS) $(INC) $^ -o $@ -lcrypto
+	$(Q)$(CC) $(CFLAGS) $(INC) $^ -o $@ $(LIB)
 	$(Q)strip -S $@
 
 all: build

@@ -58,7 +58,7 @@
  * Implements @[FIPS203, Algorithm 13 (K-PKE.KeyGen), L19]
  *
  **************************************************/
-static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES],
+static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_LEN_PUBLIC_KEY],
                         const mlk_polyvec *pk,
                         const uint8_t seed[MLKEM_SYMBYTES])
 {
@@ -84,7 +84,7 @@ static void mlk_pack_pk(uint8_t r[MLKEM_INDCPA_PUBLICKEYBYTES],
  *
  **************************************************/
 static void mlk_unpack_pk(mlk_polyvec *pk, uint8_t seed[MLKEM_SYMBYTES],
-                          const uint8_t packedpk[MLKEM_INDCPA_PUBLICKEYBYTES])
+                          const uint8_t packedpk[MLKEM_INDCPA_LEN_PUBLIC_KEY])
 {
     mlk_polyvec_frombytes(pk, packedpk);
     mlk_memcpy(seed, packedpk + MLKEM_POLYVECBYTES, MLKEM_SYMBYTES);
@@ -108,7 +108,7 @@ static void mlk_unpack_pk(mlk_polyvec *pk, uint8_t seed[MLKEM_SYMBYTES],
  * Implements @[FIPS203, Algorithm 13 (K-PKE.KeyGen), L20]
  *
  **************************************************/
-static void mlk_pack_sk(uint8_t r[MLKEM_INDCPA_SECRETKEYBYTES],
+static void mlk_pack_sk(uint8_t r[MLKEM_INDCPA_LEN_SECRET_KEY],
                         const mlk_polyvec *sk)
 {
     mlk_assert_bound_2d(sk->vec, MLKEM_K, MLKEM_N, 0, MLKEM_Q);
@@ -130,7 +130,7 @@ static void mlk_pack_sk(uint8_t r[MLKEM_INDCPA_SECRETKEYBYTES],
  *
  **************************************************/
 static void mlk_unpack_sk(mlk_polyvec *sk,
-                          const uint8_t packedsk[MLKEM_INDCPA_SECRETKEYBYTES])
+                          const uint8_t packedsk[MLKEM_INDCPA_LEN_SECRET_KEY])
 {
     mlk_polyvec_frombytes(sk, packedsk);
 }
@@ -418,8 +418,8 @@ static void mlk_keypair_getnoise_eta1(mlk_polyvec *pv, mlk_polyvec *e,
  *            - We include buffer zeroization.
  */
 MLK_INTERNAL_API
-void mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
-                               uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES],
+void mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_LEN_PUBLIC_KEY],
+                               uint8_t sk[MLKEM_INDCPA_LEN_SECRET_KEY],
                                const uint8_t coins[MLKEM_SYMBYTES])
 {
     const uint8_t *publicseed;
@@ -490,7 +490,7 @@ void mlk_indcpa_keypair_derand(uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
 MLK_INTERNAL_API
 int mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
                    const uint8_t m[MLKEM_INDCPA_MSGBYTES],
-                   const uint8_t pk[MLKEM_INDCPA_PUBLICKEYBYTES],
+                   const uint8_t pk[MLKEM_INDCPA_LEN_PUBLIC_KEY],
                    const uint8_t coins[MLKEM_SYMBYTES])
 {
     int ret = 0;
@@ -579,7 +579,7 @@ int mlk_indcpa_enc(uint8_t c[MLKEM_INDCPA_BYTES],
 MLK_INTERNAL_API
 int mlk_indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
                    const uint8_t c[MLKEM_INDCPA_BYTES],
-                   const uint8_t sk[MLKEM_INDCPA_SECRETKEYBYTES])
+                   const uint8_t sk[MLKEM_INDCPA_LEN_SECRET_KEY])
 {
     int ret = 0;
     mlk_polyvec b;
