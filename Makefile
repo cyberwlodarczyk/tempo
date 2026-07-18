@@ -55,9 +55,9 @@ include auto.mk
 #
 # Here, the monolithic C file for mlkem-native is directly included in main.c,
 # However, we still need to incldue the monolithic assembly file.
-MLK_SOURCE_C = mlkem_native_all.c
-MLK_SOURCE_ASM = mlkem_native/mlkem_native_asm.S
-INC=-Imlkem_native/ -I./
+MLK_SOURCE_C = mlkem/mlkem.c
+MLK_SOURCE_ASM = mlkem/mlkem.S
+INC=-Imlkem/ -I./
 LIB=-lcrypto
 
 # Part B:

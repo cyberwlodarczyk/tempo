@@ -21,7 +21,7 @@
  * This header defines the public API of a single build of mlkem-native.
  *
  * Make sure the configuration file is in the include path
- * (this is "mlkem_native_config.h" by default, or MLK_CONFIG_FILE if defined).
+ * (this is "config.h" by default, or MLK_CONFIG_FILE if defined).
  *
  * # Multi-level builds
  *
@@ -174,7 +174,7 @@
 #if defined(MLK_CONFIG_FILE)
 #include MLK_CONFIG_FILE
 #else
-#include "mlkem_native_config.h"
+#include "config.h"
 #endif
 
 #define MLK_CONFIG_API_PARAMETER_SET MLK_CONFIG_PARAMETER_SET
@@ -509,7 +509,7 @@ extern "C"
  * By default mlkem-native performs all memory allocations on the stack.
  * Alternatively, mlkem-native supports custom allocation of large structures
  * through the `MLK_CONFIG_CUSTOM_ALLOC_FREE` configuration option.
- * See mlkem_native_config.h for details.
+ * See config.h for details.
  *
  * `MLK_TOTAL_ALLOC_{512,768,1024}_{KEYPAIR,ENCAPS,DECAPS}` indicates the
  * maximum (accumulative) allocation via MLK_ALLOC for each parameter set and

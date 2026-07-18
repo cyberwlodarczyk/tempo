@@ -26,22 +26,22 @@
 
 #if defined(MLK_CHECK_APIS)
 /* Include to ensure consistency between internal kem.h
- * and external mlkem_native.h. */
-#include "mlkem_native.h"
+ * and external base.h. */
+#include "base.h"
 
 #if MLKEM_INDCCA_LEN_SECRET_KEY != \
     MLKEM_LEN_SECRET_KEY(MLK_CONFIG_PARAMETER_SET)
-#error Mismatch for SECRETKEYBYTES between kem.h and mlkem_native.h
+#error Mismatch for SECRETKEYBYTES between kem.h and base.h
 #endif
 
 #if MLKEM_INDCCA_LEN_PUBLIC_KEY != \
     MLKEM_LEN_PUBLIC_KEY(MLK_CONFIG_PARAMETER_SET)
-#error Mismatch for PUBLICKEYBYTES between kem.h and mlkem_native.h
+#error Mismatch for PUBLICKEYBYTES between kem.h and base.h
 #endif
 
 #if MLKEM_INDCCA_LEN_CIPHERTEXT != \
     MLKEM_LEN_CIPHERTEXT(MLK_CONFIG_PARAMETER_SET)
-#error Mismatch for CIPHERTEXTBYTES between kem.h and mlkem_native.h
+#error Mismatch for CIPHERTEXTBYTES between kem.h and base.h
 #endif
 
 #endif /* MLK_CHECK_APIS */

@@ -128,17 +128,17 @@
  *
  * NOTE: This is not needed for the assembly SCU since, at present,
  * there is no need to include it multiple times.
- * We keep it for uniformity with mlkem_native.c only.
+ * We keep it for uniformity with base.c only.
  *
  * NOTE: To avoid having to distinguish between which headers are included
  * from the assembly files, we #undef the same set of directives
- * as in mlkem_native.c
+ * as in base.c
  */
 
 /*
  * Undefine macros from MLK_CONFIG_PARAMETER_SET-specific files
  */
-/* mlkem/mlkem_native.h */
+/* mlkem/base.h */
 #undef CRYPTO_BYTES
 #undef CRYPTO_LEN_CIPHERTEXT
 #undef CRYPTO_LEN_PUBLIC_KEY

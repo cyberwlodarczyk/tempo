@@ -177,7 +177,6 @@
 #define MLK_ALIGN /* No known support for alignment constraints */
 #endif
 
-
 /* New X86_64 CPUs support Conflow-flow protection using the CET instructions.
  * When enabled (through -fcf-protection=), all compilation units (including
  * empty ones) need to support CET for this to work.
@@ -241,16 +240,15 @@ typedef enum
 
 MLK_MUST_CHECK_RETURN_VALUE
 static MLK_INLINE int mlk_sys_check_capability(mlk_sys_cap cap)
-__contract__(
-  ensures(return_value == 0 || return_value == 1)
-)
+    __contract__(
+        ensures(return_value == 0 || return_value == 1))
 {
   /* By default, we rely on compile-time feature detection/specification:
    * If a feature is enabled at compile-time, we assume it is supported by
    * the host that the resulting library/binary will be built on.
    * If this assumption is not true, you MUST overwrite this function.
    * See the documentation of MLK_CONFIG_CUSTOM_CAPABILITY_FUNC in
-   * mlkem_native_config.h for more information. */
+   * config.h for more information. */
   (void)cap;
   return 1;
 }

@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "mlkem_native_all.h"
+#include "mlkem/mlkem.h"
 
 #define CHECK(x)                                                    \
     do                                                              \

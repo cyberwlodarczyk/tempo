@@ -18,7 +18,7 @@
  *
  * # API
  *
- * The API exposed by this file is described in mlkem_native.h.
+ * The API exposed by this file is described in base.h.
  *
  * # Multi-level build
  *
@@ -53,7 +53,7 @@
  *
  * Example:
  * ```bash
- * unifdef -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH mlkem_native.c
+ * unifdef -UMLK_CONFIG_USE_NATIVE_BACKEND_ARITH base.c
  * ```
  */
 
@@ -119,7 +119,7 @@
 /*
  * Undefine macros from MLK_CONFIG_PARAMETER_SET-specific files
  */
-/* mlkem/mlkem_native.h */
+/* mlkem/base.h */
 #undef CRYPTO_BYTES
 #undef CRYPTO_LEN_CIPHERTEXT
 #undef CRYPTO_LEN_PUBLIC_KEY
