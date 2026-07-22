@@ -417,7 +417,8 @@ extern "C"
         const uint8_t sk[MLKEM_LEN_SECRET_KEY(MLK_CONFIG_API_PARAMETER_SET)]);
 
     MLK_API_QUALIFIER
-    void MLK_API_TEMPO_NAMESPACE(keygen)(
+    MLK_API_MUST_CHECK_RETURN_VALUE
+    int MLK_API_TEMPO_NAMESPACE(keygen)(
         uint8_t public_key[TEMPO_LEN_PUBLIC_KEY(MLK_CONFIG_API_PARAMETER_SET)],
         uint8_t secret_key[TEMPO_LEN_SECRET_KEY(MLK_CONFIG_API_PARAMETER_SET)],
         uint8_t apk[TEMPO_LEN_APK(MLK_CONFIG_API_PARAMETER_SET)],
@@ -425,7 +426,8 @@ extern "C"
         const uint8_t pwd[TEMPO_LEN_PWD]);
 
     MLK_API_QUALIFIER
-    void MLK_API_TEMPO_NAMESPACE(encaps)(
+    MLK_API_MUST_CHECK_RETURN_VALUE
+    int MLK_API_TEMPO_NAMESPACE(encaps)(
         uint8_t public_key[TEMPO_LEN_PUBLIC_KEY(MLK_CONFIG_API_PARAMETER_SET)],
         uint8_t ciphertext[TEMPO_LEN_CIPHERTEXT(MLK_CONFIG_API_PARAMETER_SET)],
         uint8_t ephemeral_key[TEMPO_LEN_EPHEMERAL_KEY],
@@ -434,7 +436,8 @@ extern "C"
         const uint8_t apk[TEMPO_LEN_APK(MLK_CONFIG_API_PARAMETER_SET)]);
 
     MLK_API_QUALIFIER
-    void MLK_API_TEMPO_NAMESPACE(decaps)(
+    MLK_API_MUST_CHECK_RETURN_VALUE
+    int MLK_API_TEMPO_NAMESPACE(decaps)(
         uint8_t ephemeral_key[TEMPO_LEN_EPHEMERAL_KEY],
         const uint8_t secret_key[TEMPO_LEN_SECRET_KEY(MLK_CONFIG_API_PARAMETER_SET)],
         const uint8_t ciphertext[TEMPO_LEN_CIPHERTEXT(MLK_CONFIG_API_PARAMETER_SET)]);

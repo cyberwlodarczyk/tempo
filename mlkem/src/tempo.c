@@ -142,31 +142,32 @@ int mlk_tempo_keygen(
     const uint8_t *sid,
     const uint8_t *pwd)
 {
-    int ret = mlk_kem_keypair(public_key, secret_key) != 0;
-    if (ret != 0)
-    {
-        return ret;
-    }
-    uint8_t poly[MLKEM_POLYVECBYTES];
+    int ret = 0;
     uint8_t *apk_u = apk;
     uint8_t *apk_v = apk_u + TEMPO_3LAMBDA;
     uint8_t *apk_seed = apk_v + MLKEM_POLYVECBYTES;
+    mlk_polyvec r;
+    mlk_polyvec t;
+    uint8_t poly[MLKEM_POLYVECBYTES];
+    uint8_t r_seed[TEMPO_3LAMBDA];
+    uint8_t v_hash[TEMPO_3LAMBDA];
+    ret = mlk_kem_keypair(public_key, secret_key);
+    if (ret != 0)
+    {
+        goto cleanup;
+    }
     memcpy(apk_seed, public_key + MLKEM_POLYVECBYTES, MLKEM_SYMBYTES);
     memcpy(poly, public_key, MLKEM_POLYVECBYTES);
-    uint8_t r_seed[TEMPO_3LAMBDA];
     if (mlk_randombytes(r_seed, TEMPO_3LAMBDA) != 0)
     {
         ret = MLK_ERR_RNG_FAIL;
         goto cleanup;
     }
-    mlk_polyvec r;
     h_1(&r, sid, pwd, apk_seed, r_seed);
-    mlk_polyvec t;
     mlk_polyvec_frombytes(&t, poly);
     mlk_polyvec_add(&t, &r);
     mlk_polyvec_reduce(&t);
     mlk_polyvec_tobytes(apk + TEMPO_3LAMBDA, &t);
-    uint8_t v_hash[TEMPO_3LAMBDA];
     h_2(v_hash, sid, pwd, apk_seed, apk_v);
     for (int i = 0; i < TEMPO_3LAMBDA; i++)
     {
@@ -182,7 +183,7 @@ cleanup:
 }
 
 MLK_EXTERNAL_API
-void mlk_tempo_encaps(
+int mlk_tempo_encaps(
     uint8_t *public_key,
     uint8_t *ciphertext,
     uint8_t *ephemeral_key,
@@ -190,41 +191,43 @@ void mlk_tempo_encaps(
     const uint8_t *pwd,
     const uint8_t *apk)
 {
-    uint8_t v_hash[TEMPO_3LAMBDA];
+    int ret = 0;
     const uint8_t *apk_u = apk;
     const uint8_t *apk_v = apk_u + TEMPO_3LAMBDA;
     const uint8_t *apk_seed = apk_v + MLKEM_POLYVECBYTES;
-    h_2(v_hash, sid, pwd, apk_seed, apk_v);
+    mlk_polyvec r;
+    mlk_polyvec v;
     uint8_t r_seed[TEMPO_3LAMBDA];
+    uint8_t v_hash[TEMPO_3LAMBDA];
+    uint8_t poly[MLKEM_POLYVECBYTES];
+    h_2(v_hash, sid, pwd, apk_seed, apk_v);
     for (int i = 0; i < TEMPO_3LAMBDA; i++)
     {
         r_seed[i] = v_hash[i] ^ apk_u[i];
     }
-    mlk_polyvec r;
     h_1(&r, sid, pwd, apk_seed, r_seed);
-    mlk_polyvec v;
     mlk_polyvec_frombytes(&v, apk_v);
     mlk_polyvec_sub(&v, &r);
     mlk_polyvec_reduce(&v);
-    uint8_t poly[MLKEM_POLYVECBYTES];
     mlk_polyvec_tobytes(poly, &v);
     memcpy(public_key + MLKEM_POLYVECBYTES, apk_seed, MLKEM_SYMBYTES);
     memcpy(public_key, poly, MLKEM_POLYVECBYTES);
-    mlk_kem_enc(ciphertext, ephemeral_key, public_key);
+    ret = mlk_kem_enc(ciphertext, ephemeral_key, public_key);
     mlk_zeroize(&r, sizeof(r));
     mlk_zeroize(&v, sizeof(v));
     mlk_zeroize(r_seed, TEMPO_3LAMBDA);
     mlk_zeroize(v_hash, TEMPO_3LAMBDA);
     mlk_zeroize(poly, MLKEM_POLYVECBYTES);
+    return ret;
 }
 
 MLK_EXTERNAL_API
-void mlk_tempo_decaps(
+int mlk_tempo_decaps(
     uint8_t *ephemeral_key,
     const uint8_t *secret_key,
     const uint8_t *ciphertext)
 {
-    mlk_kem_dec(ephemeral_key, ciphertext, secret_key);
+    return mlk_kem_dec(ephemeral_key, ciphertext, secret_key);
 }
 
 MLK_EXTERNAL_API

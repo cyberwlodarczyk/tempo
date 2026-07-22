@@ -1,7 +1,7 @@
 # Copyright (c) The mlkem-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-.PHONY: all build run clean
+.PHONY: all build exchange perf clean
 .DEFAULT_GOAL := all
 
 CC  ?= gcc
@@ -57,8 +57,6 @@ include auto.mk
 # However, we still need to incldue the monolithic assembly file.
 MLK_SOURCE_C = mlkem/mlkem.c
 MLK_SOURCE_ASM = mlkem/mlkem.S
-INC=-Imlkem/ -I./
-LIB=-lcrypto
 
 # Part B:
 #
@@ -75,18 +73,16 @@ LIB=-lcrypto
 # Part C:
 #
 # Your application source code
-APP_SOURCE=main.c
+# APP_SOURCE=main.c
 
 BUILD_DIR=build
-BIN=main
+BIN_EXCHANGE=$(BUILD_DIR)/exchange
+BIN_PERF=$(BUILD_DIR)/perf
 
 #
 # Configuration adjustments
 #
-
 ASMFLAGS = -DMLK_CONFIG_MULTILEVEL_WITH_SHARED
-
-BINARY_NAME_FULL=$(BUILD_DIR)/$(BIN)
 
 MLK_OBJ_C=$(patsubst %,$(BUILD_DIR)/%.o,$(MLK_SOURCE_C))
 MLK_OBJ_ASM=$(patsubst %,$(BUILD_DIR)/%.o,$(MLK_SOURCE_ASM))
@@ -96,25 +92,28 @@ Q ?= @
 $(BUILD_DIR)/%.c.o: %.c
 	$(Q)echo "CC  $^"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC) -c $(CFLAGS) $(INC) $^ -o $@
+	$(Q)$(CC) -c $(CFLAGS) -Imlkem $^ -o $@
 
 $(BUILD_DIR)/%.S.o: %.S
 	$(Q)echo "AS  $^"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC) -c $(CFLAGS) $(ASMFLAGS) $(INC) $^ -o $@
+	$(Q)$(CC) -c $(CFLAGS) $(ASMFLAGS) -Imlkem $^ -o $@
 
-$(BINARY_NAME_FULL): $(APP_SOURCE) $(MLK_OBJ_C) $(MLK_OBJ_ASM)
+$(BUILD_DIR)/%: test/%.c $(MLK_OBJ_C) $(MLK_OBJ_ASM)
 	$(Q)echo "CC  $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC) $(CFLAGS) $(INC) $^ -o $@ $(LIB)
+	$(Q)$(CC) -Wall -I. $^ -o $@ -lcrypto
 	$(Q)strip -S $@
 
 all: build
 
-build: $(BINARY_NAME_FULL)
+build: $(BIN_EXCHANGE) $(BIN_PERF)
 
-run: $(BINARY_NAME_FULL)
-	$(EXEC_WRAPPER) ./$(BINARY_NAME_FULL)
+exchange: $(BIN_EXCHANGE)
+	./$(BIN_EXCHANGE)
+
+perf: $(BIN_PERF)
+	./$(BIN_PERF)
 
 clean:
 	rm -rf $(BUILD_DIR)

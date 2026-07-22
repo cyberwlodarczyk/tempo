@@ -16,7 +16,8 @@ int mlk_tempo_keygen(
 
 #define mlk_tempo_encaps MLK_TEMPO_NAMESPACE_K(encaps)
 MLK_EXTERNAL_API
-void mlk_tempo_encaps(
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_tempo_encaps(
     uint8_t *public_key,
     uint8_t *ciphertext,
     uint8_t *ephemeral_key,
@@ -26,7 +27,8 @@ void mlk_tempo_encaps(
 
 #define mlk_tempo_decaps MLK_TEMPO_NAMESPACE_K(decaps)
 MLK_EXTERNAL_API
-void mlk_tempo_decaps(
+MLK_MUST_CHECK_RETURN_VALUE
+int mlk_tempo_decaps(
     uint8_t *ephemeral_key,
     const uint8_t *secret_key,
     const uint8_t *ciphertext);
