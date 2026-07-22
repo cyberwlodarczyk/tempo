@@ -248,9 +248,9 @@ void mlk_tempo_confirm(
         shared_secret,
         sid,
         pwd,
+        public_key,
         apk,
         ciphertext,
-        public_key,
         ephemeral_key);
 }
 

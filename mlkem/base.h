@@ -460,6 +460,32 @@ extern "C"
         uint8_t tag[TEMPO_LEN_TAG(MLK_CONFIG_API_PARAMETER_SET)],
         uint8_t peer_tag[TEMPO_LEN_TAG(MLK_CONFIG_API_PARAMETER_SET)]);
 
+#ifdef MLK_CONFIG_TESTING
+    MLK_API_QUALIFIER
+    int MLK_API_NAMESPACE(exchange)();
+
+    MLK_API_QUALIFIER
+    int MLK_API_TEMPO_NAMESPACE(exchange)();
+
+    MLK_API_QUALIFIER
+    uint64_t MLK_API_NAMESPACE(perf_gen_matrix)();
+
+    MLK_API_QUALIFIER
+    uint64_t MLK_API_NAMESPACE(perf_keypair)();
+
+    MLK_API_QUALIFIER
+    uint64_t MLK_API_NAMESPACE(perf_enc)();
+
+    MLK_API_QUALIFIER
+    uint64_t MLK_API_NAMESPACE(perf_dec)();
+
+    MLK_API_QUALIFIER
+    uint64_t MLK_API_TEMPO_NAMESPACE(perf_keygen)();
+
+    MLK_API_QUALIFIER
+    uint64_t MLK_API_TEMPO_NAMESPACE(perf_encaps)();
+#endif
+
 #ifdef __cplusplus
 }
 #endif

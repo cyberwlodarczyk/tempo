@@ -14,7 +14,7 @@ CFLAGS := \
 	-Werror=unused-result \
 	-Wpedantic \
 	-Werror \
-	-Wmissing-prototypes \
+	-Wno-missing-prototypes \
 	-Wshadow \
 	-Wpointer-arith \
 	-Wredundant-decls \

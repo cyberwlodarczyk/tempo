@@ -2,7 +2,6 @@
 #define MLK_TEMPO_H
 
 #include "common.h"
-#include "poly_k.h"
 
 #define mlk_tempo_keygen MLK_TEMPO_NAMESPACE_K(keygen)
 MLK_EXTERNAL_API

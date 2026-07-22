@@ -70,6 +70,11 @@
 #include "src/sampling.c"
 #include "src/verify.c"
 
+#ifdef MLK_CONFIG_TESTING
+#include "src/exchange.c"
+#include "src/perf.c"
+#endif
+
 #if !defined(MLK_CONFIG_FIPS202_CUSTOM_HEADER)
 #include "src/fips202/fips202.c"
 #include "src/fips202/fips202x4.c"
@@ -215,6 +220,10 @@
 #undef MLK_TEMPO_NAMESPACE_PREFIX_K
 #undef mlk_memcpy
 #undef mlk_memset
+/* mlkem/src/exchange.h */
+#undef MLK_EXCHANGE_H
+#undef mlk_exchange
+#undef mlk_tempo_exchange
 /* mlkem/src/indcpa.h */
 #undef MLK_INDCPA_H
 #undef mlk_gen_matrix
@@ -266,14 +275,14 @@
 #undef TEMPO_LEN_PWD
 #undef MLKEM_UINT12_LIMIT
 #undef MLK_PARAMS_H
-/* mlkem/src/tempo.h */
-#undef MLK_TEMPO_H
-#undef mlk_tempo_session
-#undef mlk_tempo_keygen
-#undef mlk_tempo_encaps
-#undef mlk_tempo_decaps
-#undef mlk_tempo_confirm
-#undef mlk_tempo_verify
+/* mlkem/src/perf.h */
+#undef MLK_PERF_H
+#undef mlk_perf_gen_matrix
+#undef mlk_perf_keypair
+#undef mlk_perf_enc
+#undef mlk_perf_dec
+#undef mlk_perf_tempo_keygen
+#undef mlk_perf_tempo_encaps
 /* mlkem/src/poly_k.h */
 #undef MLK_POLY_K_H
 #undef mlk_poly_compress_du
@@ -299,6 +308,14 @@
 #undef mlk_polyvec_reduce
 #undef mlk_polyvec_tobytes
 #undef mlk_polyvec_tomont
+/* mlkem/src/tempo.h */
+#undef MLK_TEMPO_H
+#undef mlk_tempo_session
+#undef mlk_tempo_keygen
+#undef mlk_tempo_encaps
+#undef mlk_tempo_decaps
+#undef mlk_tempo_confirm
+#undef mlk_tempo_verify
 
 #if !defined(MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS)
 /*
