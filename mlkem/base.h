@@ -465,7 +465,10 @@ extern "C"
     int MLK_API_NAMESPACE(test_exchange)();
 
     MLK_API_QUALIFIER
-    int MLK_API_TEMPO_NAMESPACE(test_exchange)();
+    int MLK_API_TEMPO_NAMESPACE(test_exchange_correct)();
+
+    MLK_API_QUALIFIER
+    int MLK_API_TEMPO_NAMESPACE(test_exchange_incorrect)();
 
     MLK_API_QUALIFIER
     int MLK_API_TEMPO_NAMESPACE(test_gen_matrix)();

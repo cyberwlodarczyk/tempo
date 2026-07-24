@@ -11,6 +11,14 @@ int mlk_test_exchange();
 MLK_EXTERNAL_API
 int mlk_test_tempo_exchange();
 
+#define mlk_test_tempo_exchange_correct MLK_TEMPO_NAMESPACE_K(test_exchange_correct)
+MLK_EXTERNAL_API
+int mlk_test_tempo_exchange_correct();
+
+#define mlk_test_tempo_exchange_incorrect MLK_TEMPO_NAMESPACE_K(test_exchange_incorrect)
+MLK_EXTERNAL_API
+int mlk_test_tempo_exchange_incorrect();
+
 #define mlk_test_tempo_gen_matrix MLK_TEMPO_NAMESPACE_K(test_gen_matrix)
 MLK_EXTERNAL_API
 int mlk_test_tempo_gen_matrix();

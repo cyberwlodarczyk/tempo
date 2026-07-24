@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdio.h>
 #include <openssl/rand.h>
 #include "test.h"
 #include "indcpa.h"
@@ -32,17 +33,15 @@ int mlk_test_exchange()
     return 0;
 }
 
-MLK_EXTERNAL_API
-int mlk_test_tempo_exchange()
+#define test_tempo_exchange MLK_ADD_PARAM_SET(test_tempo_exchange)
+static int test_tempo_exchange(uint8_t *pwd1, uint8_t *pwd2)
 {
     uint8_t sid[TEMPO_LEN_SID];
     RAND_bytes(sid, TEMPO_LEN_SID);
-    uint8_t pwd[TEMPO_LEN_PWD];
-    RAND_bytes(sid, TEMPO_LEN_PWD);
     uint8_t pk1[MLKEM_INDCCA_LEN_PUBLIC_KEY];
     uint8_t sk[MLKEM_INDCCA_LEN_SECRET_KEY];
     uint8_t apk[TEMPO_LEN_APK];
-    if (mlk_tempo_keygen(pk1, sk, apk, sid, pwd) != 0)
+    if (mlk_tempo_keygen(pk1, sk, apk, sid, pwd1) != 0)
     {
         return -1;
     }
@@ -54,7 +53,7 @@ int mlk_test_tempo_exchange()
             ct,
             ek1,
             sid,
-            pwd,
+            pwd2,
             apk) != 0)
     {
         return -1;
@@ -72,7 +71,7 @@ int mlk_test_tempo_exchange()
         tag_b_a,
         shared_secret_a,
         sid,
-        pwd,
+        pwd1,
         apk,
         ct,
         pk1,
@@ -85,7 +84,7 @@ int mlk_test_tempo_exchange()
         tag_b_b,
         shared_secret_b,
         sid,
-        pwd,
+        pwd2,
         apk,
         ct,
         pk2,
@@ -94,7 +93,7 @@ int mlk_test_tempo_exchange()
     {
         return -1;
     }
-    if (mlk_tempo_verify(tag_a_a, tag_a_b) != 0)
+    if (mlk_tempo_verify(tag_b_a, tag_b_b) != 0)
     {
         return -1;
     }
@@ -103,6 +102,24 @@ int mlk_test_tempo_exchange()
         return -1;
     }
     return 0;
+}
+
+MLK_EXTERNAL_API
+int mlk_test_tempo_exchange_correct()
+{
+    uint8_t pwd[TEMPO_LEN_PWD];
+    RAND_bytes(pwd, TEMPO_LEN_PWD);
+    return test_tempo_exchange(pwd, pwd);
+}
+
+MLK_EXTERNAL_API
+int mlk_test_tempo_exchange_incorrect()
+{
+    uint8_t pwd1[TEMPO_LEN_PWD];
+    RAND_bytes(pwd1, TEMPO_LEN_PWD);
+    uint8_t pwd2[TEMPO_LEN_PWD];
+    RAND_bytes(pwd2, TEMPO_LEN_PWD);
+    return test_tempo_exchange(pwd1, pwd2) == 0 ? -1 : 0;
 }
 
 MLK_EXTERNAL_API
@@ -130,3 +147,5 @@ int mlk_test_tempo_gen_matrix()
     }
     return 0;
 }
+
+#undef test_tempo_exchange

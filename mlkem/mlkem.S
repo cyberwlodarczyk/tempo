@@ -237,7 +237,8 @@
 /* mlkem/src/test.h */
 #undef MLK_TEST_H
 #undef mlk_test_exchange
-#undef mlk_test_tempo_exchange
+#undef mlk_test_tempo_exchange_correct
+#undef mlk_test_tempo_exchange_incorrect
 #undef mlk_test_tempo_gen_matrix
 /* mlkem/src/indcpa.h */
 #undef MLK_INDCPA_H
