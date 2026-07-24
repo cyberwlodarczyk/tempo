@@ -1,5 +1,6 @@
 #include "tempo.h"
 #include "symmetric.h"
+#include "poly_k.h"
 #include "kem.h"
 
 #define h_fls MLK_ADD_PARAM_SET(h_fls)
@@ -9,7 +10,6 @@ static void h_fls(
     int transposed,
     int n)
 {
-    mlk_xof_ctx ctx;
     uint8_t buf[5 * SHAKE128_RATE];
     uint8_t ext_seed[MLKEM_SYMBYTES + 2];
     memcpy(ext_seed, seed, MLKEM_SYMBYTES);
@@ -19,11 +19,13 @@ static void h_fls(
         for (uint8_t x = 0; x < MLKEM_K; x++)
         {
             ext_seed[MLKEM_SYMBYTES + transposed] = x;
+            mlk_xof_ctx ctx;
             mlk_xof_absorb(&ctx, ext_seed, sizeof(ext_seed));
             mlk_xof_squeezeblocks(buf, 5, &ctx);
             int ctr = 0;
             for (int i = 0, buf_i = 0; i <= 279; i++, buf_i += 3)
             {
+
                 uint16_t d[2];
                 int d_ok[2];
                 d[0] = ((buf[buf_i + 0] >> 0) |
@@ -48,9 +50,9 @@ static void h_fls(
                     ctr += flag;
                 }
             }
+            mlk_xof_release(&ctx);
         }
     }
-    mlk_xof_release(&ctx);
     mlk_zeroize(buf, sizeof(buf));
     mlk_zeroize(ext_seed, sizeof(ext_seed));
 }

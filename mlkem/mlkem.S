@@ -241,6 +241,8 @@
 #undef mlk_test_tempo_gen_matrix
 /* mlkem/src/indcpa.h */
 #undef MLK_INDCPA_H
+#undef mlk_polyvec_permute_bitrev_to_custom
+#undef mlk_polymat_permute_bitrev_to_custom
 #undef mlk_gen_matrix
 #undef mlk_indcpa_dec
 #undef mlk_indcpa_enc

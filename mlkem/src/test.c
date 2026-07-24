@@ -1,5 +1,4 @@
 #include <string.h>
-#include <stdio.h>
 #include <openssl/rand.h>
 #include "test.h"
 #include "indcpa.h"
@@ -115,6 +114,7 @@ int mlk_test_tempo_gen_matrix()
     mlk_gen_matrix(&a1, seed, 0);
     mlk_polymat a2;
     mlk_tempo_gen_matrix(&a2, seed, 0);
+    mlk_polymat_permute_bitrev_to_custom(&a2);
     for (int i = 0; i < MLKEM_K; i++)
     {
         for (int j = 0; j < MLKEM_K; j++)

@@ -19,6 +19,7 @@
 
 #include "indcpa.h"
 
+#include <stdio.h>
 #include "debug.h"
 #include "randombytes.h"
 #include "sampling.h"
@@ -35,10 +36,6 @@
 #define mlk_pack_ciphertext MLK_ADD_PARAM_SET(mlk_pack_ciphertext)
 #define mlk_unpack_ciphertext MLK_ADD_PARAM_SET(mlk_unpack_ciphertext)
 #define mlk_matvec_mul MLK_ADD_PARAM_SET(mlk_matvec_mul)
-#define mlk_polyvec_permute_bitrev_to_custom \
-    MLK_ADD_PARAM_SET(mlk_polyvec_permute_bitrev_to_custom)
-#define mlk_polymat_permute_bitrev_to_custom \
-    MLK_ADD_PARAM_SET(mlk_polymat_permute_bitrev_to_custom)
 #define mlk_keypair_getnoise_eta1 MLK_ADD_PARAM_SET(mlk_keypair_getnoise_eta1)
 /* End of parameter set namespacing */
 
@@ -184,16 +181,8 @@ static void mlk_unpack_ciphertext(mlk_polyvec *b, mlk_poly *v,
  *
  * We don't inline this into gen_matrix to avoid having to split the CBMC
  * proof for gen_matrix based on MLK_USE_NATIVE_NTT_CUSTOM_ORDER. */
-static void mlk_polyvec_permute_bitrev_to_custom(mlk_polyvec *v)
-    __contract__(
-        /* We don't specify that this should be a permutation, but only
-         * that it does not change the bound established at the end of mlk_gen_matrix. */
-        requires(memory_no_alias(v, sizeof(mlk_polyvec)))
-            requires(forall(x, 0, MLKEM_K,
-                            array_bound(v->vec[x].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
-                assigns(memory_slice(v, sizeof(mlk_polyvec)))
-                    ensures(forall(x, 0, MLKEM_K,
-                                   array_bound(v->vec[x].coeffs, 0, MLKEM_N, 0, MLKEM_Q))))
+MLK_INTERNAL_API
+void mlk_polyvec_permute_bitrev_to_custom(mlk_polyvec *v)
 {
 #if defined(MLK_USE_NATIVE_NTT_CUSTOM_ORDER)
     unsigned i;
@@ -213,14 +202,8 @@ static void mlk_polyvec_permute_bitrev_to_custom(mlk_polyvec *v)
 #endif /* !MLK_USE_NATIVE_NTT_CUSTOM_ORDER */
 }
 
-static void mlk_polymat_permute_bitrev_to_custom(mlk_polymat *a)
-    __contract__(
-        /* We don't specify that this should be a permutation, but only
-         * that it does not change the bound established at the end of mlk_gen_matrix. */
-        requires(memory_no_alias(a, sizeof(mlk_polymat)))
-            requires(forall(x, 0, MLKEM_K, forall(y, 0, MLKEM_K, array_bound(a->vec[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q))))
-                assigns(memory_slice(a, sizeof(mlk_polymat)))
-                    ensures(forall(x, 0, MLKEM_K, forall(y, 0, MLKEM_K, array_bound(a->vec[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))))
+MLK_INTERNAL_API
+void mlk_polymat_permute_bitrev_to_custom(mlk_polymat *a)
 {
     unsigned i;
     for (i = 0; i < MLKEM_K; i++)
@@ -620,6 +603,4 @@ int mlk_indcpa_dec(uint8_t m[MLKEM_INDCPA_MSGBYTES],
 #undef mlk_pack_ciphertext
 #undef mlk_unpack_ciphertext
 #undef mlk_matvec_mul
-#undef mlk_polyvec_permute_bitrev_to_custom
-#undef mlk_polymat_permute_bitrev_to_custom
 #undef mlk_keypair_getnoise_eta1
