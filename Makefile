@@ -80,6 +80,7 @@ BUILD_DIR=build
 BIN_DIR=bin
 BIN_TEST=$(BIN_DIR)/test
 BIN_PERF=$(BIN_DIR)/perf
+BIN_PERF_GEN_MATRIX=$(BIN_DIR)/perf_gen_matrix
 
 #
 # Configuration adjustments
@@ -109,13 +110,16 @@ $(BIN_DIR)/%: %.c $(MLK_OBJ_C) $(MLK_OBJ_ASM)
 
 all: build
 
-build: $(BIN_TEST) $(BIN_PERF)
+build: $(BIN_TEST) $(BIN_PERF) $(BIN_PERF_GEN_MATRIX)
 
 test: $(BIN_TEST)
 	./$(BIN_TEST)
 
 perf: $(BIN_PERF)
 	./$(BIN_PERF)
+
+perf_gen_matrix: $(BIN_PERF_GEN_MATRIX)
+	./$(BIN_PERF_GEN_MATRIX) | python3 perf_gen_matrix.py
 
 clean:
 	rm -rf $(BUILD_DIR)
