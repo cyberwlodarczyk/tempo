@@ -176,7 +176,8 @@
  *****************************************************************************/
 /* #define MLK_CONFIG_CONSTANTS_ONLY */
 
-#define MLK_CONFIG_TESTING
+#define MLK_CONFIG_TEST
+#define MLK_CONFIG_PERF
 
 /******************************************************************************
  *

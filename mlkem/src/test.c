@@ -1,11 +1,13 @@
 #include <string.h>
+#include <stdio.h>
 #include <openssl/rand.h>
-#include "exchange.h"
+#include "test.h"
+#include "indcpa.h"
 #include "kem.h"
 #include "tempo.h"
 
 MLK_EXTERNAL_API
-int mlk_exchange()
+int mlk_test_exchange()
 {
     uint8_t pk[MLKEM_INDCCA_LEN_PUBLIC_KEY];
     uint8_t sk[MLKEM_INDCCA_LEN_SECRET_KEY];
@@ -32,7 +34,7 @@ int mlk_exchange()
 }
 
 MLK_EXTERNAL_API
-int mlk_tempo_exchange()
+int mlk_test_tempo_exchange()
 {
     uint8_t sid[TEMPO_LEN_SID];
     RAND_bytes(sid, TEMPO_LEN_SID);
@@ -65,7 +67,7 @@ int mlk_tempo_exchange()
     }
     uint8_t tag_a_a[TEMPO_LEN_TAG];
     uint8_t tag_b_a[TEMPO_LEN_TAG];
-    uint8_t shared_secret_a[TEMPO_SSBYTES];
+    uint8_t shared_secret_a[TEMPO_LEN_SHARED_SECRET];
     mlk_tempo_confirm(
         tag_a_a,
         tag_b_a,
@@ -78,7 +80,7 @@ int mlk_tempo_exchange()
         ek2);
     uint8_t tag_a_b[TEMPO_LEN_TAG];
     uint8_t tag_b_b[TEMPO_LEN_TAG];
-    uint8_t shared_secret_b[TEMPO_SSBYTES];
+    uint8_t shared_secret_b[TEMPO_LEN_SHARED_SECRET];
     mlk_tempo_confirm(
         tag_a_b,
         tag_b_b,
@@ -97,9 +99,34 @@ int mlk_tempo_exchange()
     {
         return -1;
     }
-    if (memcmp(shared_secret_a, shared_secret_b, TEMPO_SSBYTES) != 0)
+    if (memcmp(shared_secret_a, shared_secret_b, TEMPO_LEN_SHARED_SECRET) != 0)
     {
         return -1;
+    }
+    return 0;
+}
+
+MLK_EXTERNAL_API
+int mlk_test_tempo_gen_matrix()
+{
+    uint8_t seed[MLKEM_SYMBYTES];
+    RAND_bytes(seed, MLKEM_SYMBYTES);
+    mlk_polymat a1;
+    mlk_gen_matrix(&a1, seed, 0);
+    mlk_polymat a2;
+    mlk_tempo_gen_matrix(&a2, seed, 0);
+    for (int i = 0; i < MLKEM_K; i++)
+    {
+        for (int j = 0; j < MLKEM_K; j++)
+        {
+            for (int k = 0; k < MLKEM_N; k++)
+            {
+                if (a1.vec[i].vec[j].coeffs[k] != a2.vec[i].vec[j].coeffs[k])
+                {
+                    return -1;
+                }
+            }
+        }
     }
     return 0;
 }

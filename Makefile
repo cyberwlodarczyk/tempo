@@ -15,6 +15,7 @@ CFLAGS := \
 	-Wpedantic \
 	-Werror \
 	-Wno-missing-prototypes \
+	-Wno-unused-function \
 	-Wshadow \
 	-Wpointer-arith \
 	-Wredundant-decls \
@@ -76,8 +77,9 @@ MLK_SOURCE_ASM = mlkem/mlkem.S
 # APP_SOURCE=main.c
 
 BUILD_DIR=build
-BIN_EXCHANGE=$(BUILD_DIR)/exchange
-BIN_PERF=$(BUILD_DIR)/perf
+BIN_DIR=bin
+BIN_TEST=$(BIN_DIR)/test
+BIN_PERF=$(BIN_DIR)/perf
 
 #
 # Configuration adjustments
@@ -99,7 +101,7 @@ $(BUILD_DIR)/%.S.o: %.S
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	$(Q)$(CC) -c $(CFLAGS) $(ASMFLAGS) -Imlkem $^ -o $@
 
-$(BUILD_DIR)/%: test/%.c $(MLK_OBJ_C) $(MLK_OBJ_ASM)
+$(BIN_DIR)/%: %.c $(MLK_OBJ_C) $(MLK_OBJ_ASM)
 	$(Q)echo "CC  $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
 	$(Q)$(CC) -Wall -I. $^ -o $@ -lcrypto
@@ -107,13 +109,14 @@ $(BUILD_DIR)/%: test/%.c $(MLK_OBJ_C) $(MLK_OBJ_ASM)
 
 all: build
 
-build: $(BIN_EXCHANGE) $(BIN_PERF)
+build: $(BIN_TEST) $(BIN_PERF)
 
-exchange: $(BIN_EXCHANGE)
-	./$(BIN_EXCHANGE)
+test: $(BIN_TEST)
+	./$(BIN_TEST)
 
 perf: $(BIN_PERF)
 	./$(BIN_PERF)
 
 clean:
 	rm -rf $(BUILD_DIR)
+	rm -rf $(BIN_DIR)

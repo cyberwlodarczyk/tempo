@@ -19,6 +19,10 @@ uint64_t mlk_perf_enc();
 MLK_EXTERNAL_API
 uint64_t mlk_perf_dec();
 
+#define mlk_perf_tempo_gen_matrix MLK_TEMPO_NAMESPACE_K(perf_gen_matrix)
+MLK_EXTERNAL_API
+uint64_t mlk_perf_tempo_gen_matrix();
+
 #define mlk_perf_tempo_keygen MLK_TEMPO_NAMESPACE_K(perf_keygen)
 MLK_EXTERNAL_API
 uint64_t mlk_perf_tempo_keygen();

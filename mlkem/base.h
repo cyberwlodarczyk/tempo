@@ -460,13 +460,18 @@ extern "C"
         uint8_t tag[TEMPO_LEN_TAG(MLK_CONFIG_API_PARAMETER_SET)],
         uint8_t peer_tag[TEMPO_LEN_TAG(MLK_CONFIG_API_PARAMETER_SET)]);
 
-#ifdef MLK_CONFIG_TESTING
+#ifdef MLK_CONFIG_TEST
     MLK_API_QUALIFIER
-    int MLK_API_NAMESPACE(exchange)();
+    int MLK_API_NAMESPACE(test_exchange)();
 
     MLK_API_QUALIFIER
-    int MLK_API_TEMPO_NAMESPACE(exchange)();
+    int MLK_API_TEMPO_NAMESPACE(test_exchange)();
 
+    MLK_API_QUALIFIER
+    int MLK_API_TEMPO_NAMESPACE(test_gen_matrix)();
+#endif
+
+#ifdef MLK_CONFIG_PERF
     MLK_API_QUALIFIER
     uint64_t MLK_API_NAMESPACE(perf_gen_matrix)();
 
@@ -478,6 +483,9 @@ extern "C"
 
     MLK_API_QUALIFIER
     uint64_t MLK_API_NAMESPACE(perf_dec)();
+
+    MLK_API_QUALIFIER
+    uint64_t MLK_API_TEMPO_NAMESPACE(perf_gen_matrix)();
 
     MLK_API_QUALIFIER
     uint64_t MLK_API_TEMPO_NAMESPACE(perf_keygen)();

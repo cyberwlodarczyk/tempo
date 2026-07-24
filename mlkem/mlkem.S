@@ -234,10 +234,11 @@
 #undef MLK_TEMPO_NAMESPACE_PREFIX_K
 #undef mlk_memcpy
 #undef mlk_memset
-/* mlkem/src/exchange.h */
-#undef MLK_EXCHANGE_H
-#undef mlk_exchange
-#undef mlk_tempo_exchange
+/* mlkem/src/test.h */
+#undef MLK_TEST_H
+#undef mlk_test_exchange
+#undef mlk_test_tempo_exchange
+#undef mlk_test_tempo_gen_matrix
 /* mlkem/src/indcpa.h */
 #undef MLK_INDCPA_H
 #undef mlk_gen_matrix
@@ -284,7 +285,7 @@
 #undef TEMPO_3LAMBDA
 #undef TEMPO_LEN_TAG
 #undef TEMPO_LEN_APK
-#undef TEMPO_SSBYTES
+#undef TEMPO_LEN_SHARED_SECRET
 #undef TEMPO_LEN_SID
 #undef TEMPO_LEN_PWD
 #undef MLKEM_UINT12_LIMIT
@@ -295,6 +296,7 @@
 #undef mlk_perf_keypair
 #undef mlk_perf_enc
 #undef mlk_perf_dec
+#undef mlk_perf_tempo_gen_matrix
 #undef mlk_perf_tempo_keygen
 #undef mlk_perf_tempo_encaps
 /* mlkem/src/poly_k.h */

@@ -5,43 +5,48 @@
 #define h_fls MLK_ADD_PARAM_SET(h_fls)
 static void h_fls(
     mlk_polyvec *a,
-    const uint8_t *seed)
+    const uint8_t *seed,
+    int transposed,
+    int n)
 {
     mlk_xof_ctx ctx;
     uint8_t buf[5 * SHAKE128_RATE];
     uint8_t ext_seed[MLKEM_SYMBYTES + 2];
     memcpy(ext_seed, seed, MLKEM_SYMBYTES);
-    ext_seed[MLKEM_SYMBYTES + 1] = 0;
-    for (uint8_t x = 0; x < MLKEM_K; x++)
+    for (uint8_t y = 0; y < n; y++)
     {
-        ext_seed[MLKEM_SYMBYTES + 0] = x;
-        mlk_xof_absorb(&ctx, ext_seed, sizeof(ext_seed));
-        mlk_xof_squeezeblocks(buf, 5, &ctx);
-        int ctr = 0;
-        for (int i = 0, buf_i = 0; i <= 279; i++, buf_i += 3)
+        ext_seed[MLKEM_SYMBYTES + !transposed] = y;
+        for (uint8_t x = 0; x < MLKEM_K; x++)
         {
-            uint16_t d[2];
-            int d_ok[2];
-            d[0] = ((buf[buf_i + 0] >> 0) |
-                    ((uint16_t)buf[buf_i + 1] << 8)) &
-                   0xFFF;
-            d[1] = ((buf[buf_i + 1] >> 4) |
-                    ((uint16_t)buf[buf_i + 2] << 4)) &
-                   0xFFF;
-            d_ok[0] = (d[0] < MLKEM_Q);
-            d_ok[1] = (d[1] < MLKEM_Q);
-            for (int d_i = 0; d_i < 2; d_i++)
+            ext_seed[MLKEM_SYMBYTES + transposed] = x;
+            mlk_xof_absorb(&ctx, ext_seed, sizeof(ext_seed));
+            mlk_xof_squeezeblocks(buf, 5, &ctx);
+            int ctr = 0;
+            for (int i = 0, buf_i = 0; i <= 279; i++, buf_i += 3)
             {
-                int flag = 0;
-                for (int j = 0; j < MLKEM_N; j++)
+                uint16_t d[2];
+                int d_ok[2];
+                d[0] = ((buf[buf_i + 0] >> 0) |
+                        ((uint16_t)buf[buf_i + 1] << 8)) &
+                       0xFFF;
+                d[1] = ((buf[buf_i + 1] >> 4) |
+                        ((uint16_t)buf[buf_i + 2] << 4)) &
+                       0xFFF;
+                d_ok[0] = (d[0] < MLKEM_Q);
+                d_ok[1] = (d[1] < MLKEM_Q);
+                for (int d_i = 0; d_i < 2; d_i++)
                 {
-                    int match = (j == ctr);
-                    int mask = match * d_ok[d_i];
-                    int16_t *coeffs = a->vec[x].coeffs;
-                    coeffs[j] = (int16_t)(coeffs[j] * (1 - mask) + d[d_i] * mask);
-                    flag += mask;
+                    int flag = 0;
+                    for (int j = 0; j < MLKEM_N; j++)
+                    {
+                        int match = (j == ctr);
+                        int mask = match * d_ok[d_i];
+                        int16_t *coeffs = a[y].vec[x].coeffs;
+                        coeffs[j] = (int16_t)(coeffs[j] * (1 - mask) + d[d_i] * mask);
+                        flag += mask;
+                    }
+                    ctr += flag;
                 }
-                ctr += flag;
             }
         }
     }
@@ -71,7 +76,7 @@ static void h_1(
     memcpy(input + (i += TEMPO_LEN_PWD), seed, MLKEM_SYMBYTES);
     memcpy(input + (i += MLKEM_SYMBYTES), r_seed, TEMPO_3LAMBDA);
     mlk_shake256(output, outlen, input, inlen);
-    h_fls(r, output);
+    h_fls(r, output, 0, 1);
     mlk_zeroize(input, inlen);
     mlk_zeroize(output, outlen);
 }
@@ -116,7 +121,7 @@ static inline void h_confirm(
                          TEMPO_LEN_APK +
                          MLKEM_INDCCA_LEN_CIPHERTEXT +
                          MLKEM_SSBYTES;
-    const size_t outlen = 2 * TEMPO_LEN_TAG + TEMPO_SSBYTES;
+    const size_t outlen = 2 * TEMPO_LEN_TAG + TEMPO_LEN_SHARED_SECRET;
     uint8_t input[inlen];
     uint8_t output[outlen];
     size_t i = 0;
@@ -129,9 +134,18 @@ static inline void h_confirm(
     mlk_shake256(output, outlen, input, inlen);
     memcpy(tag_a, output, TEMPO_LEN_TAG);
     memcpy(tag_b, output + TEMPO_LEN_TAG, TEMPO_LEN_TAG);
-    memcpy(shared_secret, output + 2 * TEMPO_LEN_TAG, TEMPO_SSBYTES);
+    memcpy(shared_secret, output + 2 * TEMPO_LEN_TAG, TEMPO_LEN_SHARED_SECRET);
     mlk_zeroize(input, inlen);
     mlk_zeroize(output, outlen);
+}
+
+MLK_INTERNAL_API
+void mlk_tempo_gen_matrix(
+    mlk_polymat *a,
+    uint8_t seed[MLKEM_SYMBYTES],
+    int transposed)
+{
+    h_fls(a->vec, seed, transposed, MLKEM_K);
 }
 
 MLK_EXTERNAL_API

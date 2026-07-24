@@ -2,6 +2,14 @@
 #define MLK_TEMPO_H
 
 #include "common.h"
+#include "poly_k.h"
+
+#define mlk_tempo_gen_matrix MLK_TEMPO_NAMESPACE_K(gen_matrix)
+MLK_INTERNAL_API
+void mlk_tempo_gen_matrix(
+    mlk_polymat *a,
+    uint8_t seed[MLKEM_SYMBYTES],
+    int transposed);
 
 #define mlk_tempo_keygen MLK_TEMPO_NAMESPACE_K(keygen)
 MLK_EXTERNAL_API
