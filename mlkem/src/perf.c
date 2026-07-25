@@ -17,6 +17,17 @@ static uint64_t time_ns()
 }
 
 MLK_EXTERNAL_API
+uint64_t mlk_perf_gen_vector()
+{
+    uint8_t seed[MLKEM_SYMBYTES];
+    RAND_bytes(seed, MLKEM_SYMBYTES);
+    mlk_polyvec v;
+    uint64_t start = time_ns();
+    mlk_gen_vector(&v, seed, 0);
+    return time_ns() - start;
+}
+
+MLK_EXTERNAL_API
 uint64_t mlk_perf_gen_matrix()
 {
     uint8_t seed[MLKEM_SYMBYTES];
@@ -84,6 +95,28 @@ uint64_t mlk_perf_dec()
 }
 
 MLK_EXTERNAL_API
+uint64_t mlk_perf_tempo_gen_vector()
+{
+    uint8_t seed[MLKEM_SYMBYTES];
+    RAND_bytes(seed, MLKEM_SYMBYTES);
+    mlk_polyvec v;
+    uint64_t start = time_ns();
+    mlk_tempo_gen_vector(&v, seed, 0);
+    return time_ns() - start;
+}
+
+MLK_EXTERNAL_API
+uint64_t mlk_perf_tempo_gen_matrix()
+{
+    uint8_t seed[MLKEM_SYMBYTES];
+    RAND_bytes(seed, MLKEM_SYMBYTES);
+    mlk_polymat a;
+    uint64_t start = time_ns();
+    mlk_tempo_gen_matrix(&a, seed, 0);
+    return time_ns() - start;
+}
+
+MLK_EXTERNAL_API
 uint64_t mlk_perf_tempo_keygen()
 {
     uint8_t pk[MLKEM_INDCCA_LEN_PUBLIC_KEY];
@@ -98,17 +131,6 @@ uint64_t mlk_perf_tempo_keygen()
     {
         return 0;
     }
-    return time_ns() - start;
-}
-
-MLK_EXTERNAL_API
-uint64_t mlk_perf_tempo_gen_matrix()
-{
-    uint8_t seed[MLKEM_SYMBYTES];
-    RAND_bytes(seed, MLKEM_SYMBYTES);
-    mlk_polymat a;
-    uint64_t start = time_ns();
-    mlk_tempo_gen_matrix(&a, seed, 0);
     return time_ns() - start;
 }
 

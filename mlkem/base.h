@@ -471,10 +471,16 @@ extern "C"
     int MLK_API_TEMPO_NAMESPACE(test_exchange_incorrect)();
 
     MLK_API_QUALIFIER
+    int MLK_API_TEMPO_NAMESPACE(test_gen_vector)();
+
+    MLK_API_QUALIFIER
     int MLK_API_TEMPO_NAMESPACE(test_gen_matrix)();
 #endif
 
 #ifdef MLK_CONFIG_PERF
+    MLK_API_QUALIFIER
+    uint64_t MLK_API_NAMESPACE(perf_gen_vector)();
+
     MLK_API_QUALIFIER
     uint64_t MLK_API_NAMESPACE(perf_gen_matrix)();
 
@@ -486,6 +492,9 @@ extern "C"
 
     MLK_API_QUALIFIER
     uint64_t MLK_API_NAMESPACE(perf_dec)();
+
+    MLK_API_QUALIFIER
+    uint64_t MLK_API_TEMPO_NAMESPACE(perf_gen_vector)();
 
     MLK_API_QUALIFIER
     uint64_t MLK_API_TEMPO_NAMESPACE(perf_gen_matrix)();

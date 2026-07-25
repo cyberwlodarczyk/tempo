@@ -19,6 +19,10 @@ int mlk_test_tempo_exchange_correct();
 MLK_EXTERNAL_API
 int mlk_test_tempo_exchange_incorrect();
 
+#define mlk_test_tempo_gen_vector MLK_TEMPO_NAMESPACE_K(test_gen_vector)
+MLK_EXTERNAL_API
+int mlk_test_tempo_gen_vector();
+
 #define mlk_test_tempo_gen_matrix MLK_TEMPO_NAMESPACE_K(test_gen_matrix)
 MLK_EXTERNAL_API
 int mlk_test_tempo_gen_matrix();

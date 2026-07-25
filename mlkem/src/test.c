@@ -123,6 +123,29 @@ int mlk_test_tempo_exchange_incorrect()
 }
 
 MLK_EXTERNAL_API
+int mlk_test_tempo_gen_vector()
+{
+    uint8_t seed[MLKEM_SYMBYTES];
+    RAND_bytes(seed, MLKEM_SYMBYTES);
+    mlk_polyvec v1;
+    mlk_gen_vector(&v1, seed, 0);
+    mlk_polyvec v2;
+    mlk_tempo_gen_vector(&v2, seed, 0);
+    mlk_polyvec_permute_bitrev_to_custom(&v2);
+    for (int j = 0; j < MLKEM_K; j++)
+    {
+        for (int k = 0; k < MLKEM_N; k++)
+        {
+            if (v1.vec[j].coeffs[k] != v2.vec[j].coeffs[k])
+            {
+                return -1;
+            }
+        }
+    }
+    return 0;
+}
+
+MLK_EXTERNAL_API
 int mlk_test_tempo_gen_matrix()
 {
     uint8_t seed[MLKEM_SYMBYTES];

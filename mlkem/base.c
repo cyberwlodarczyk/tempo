@@ -227,6 +227,7 @@
 #undef mlk_test_exchange
 #undef mlk_test_tempo_exchange_correct
 #undef mlk_test_tempo_exchange_incorrect
+#undef mlk_test_tempo_gen_vector
 #undef mlk_test_tempo_gen_matrix
 /* mlkem/src/indcpa.h */
 #undef MLK_INDCPA_H
@@ -283,10 +284,12 @@
 #undef MLK_PARAMS_H
 /* mlkem/src/perf.h */
 #undef MLK_PERF_H
+#undef mlk_perf_gen_vector
 #undef mlk_perf_gen_matrix
 #undef mlk_perf_keypair
 #undef mlk_perf_enc
 #undef mlk_perf_dec
+#undef mlk_perf_tempo_gen_vector
 #undef mlk_perf_tempo_gen_matrix
 #undef mlk_perf_tempo_keygen
 #undef mlk_perf_tempo_encaps

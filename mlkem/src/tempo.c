@@ -5,7 +5,7 @@
 
 #define h_fls MLK_ADD_PARAM_SET(h_fls)
 static void h_fls(
-    mlk_polyvec *a,
+    mlk_polyvec *v,
     const uint8_t *seed,
     int transposed,
     int n)
@@ -43,7 +43,7 @@ static void h_fls(
                     {
                         int match = (j == ctr);
                         int mask = match * d_ok[d_i];
-                        int16_t *coeffs = a[y].vec[x].coeffs;
+                        int16_t *coeffs = v[y].vec[x].coeffs;
                         coeffs[j] = (int16_t)(coeffs[j] * (1 - mask) + d[d_i] * mask);
                         flag += mask;
                     }
@@ -139,6 +139,15 @@ static inline void h_confirm(
     memcpy(shared_secret, output + 2 * TEMPO_LEN_TAG, TEMPO_LEN_SHARED_SECRET);
     mlk_zeroize(input, inlen);
     mlk_zeroize(output, outlen);
+}
+
+MLK_INTERNAL_API
+void mlk_tempo_gen_vector(
+    mlk_polyvec *v,
+    uint8_t seed[MLKEM_SYMBYTES],
+    int transposed)
+{
+    h_fls(v, seed, transposed, 1);
 }
 
 MLK_INTERNAL_API
