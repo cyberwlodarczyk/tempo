@@ -29,6 +29,8 @@ CFLAGS := \
 	-std=c99 \
 	-pedantic \
 	-MMD \
+	-mavx512f \
+	-mavx512bw \
 	$(CFLAGS)
 
 # If you want to use the native backends, the compiler needs to know about

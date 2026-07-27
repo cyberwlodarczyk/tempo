@@ -1,3 +1,7 @@
+#include "sys.h"
+#if defined(MLK_SYS_X86_64_AVX2) || defined(MLK_SYS_X86_64_AVX512)
+#include <immintrin.h>
+#endif
 #include "tempo.h"
 #include "symmetric.h"
 #include "poly_k.h"
@@ -18,38 +22,84 @@ static void h_fls(
         ext_seed[MLKEM_SYMBYTES + !transposed] = y;
         for (uint8_t x = 0; x < MLKEM_K; x++)
         {
+#if defined(MLK_SYS_X86_64_AVX512)
+            __attribute__((aligned(64))) int16_t poly[MLKEM_N];
+#endif
             ext_seed[MLKEM_SYMBYTES + transposed] = x;
             mlk_xof_ctx ctx;
             mlk_xof_absorb(&ctx, ext_seed, sizeof(ext_seed));
             mlk_xof_squeezeblocks(buf, 5, &ctx);
             int ctr = 0;
-            for (int i = 0, buf_i = 0; i <= 279; i++, buf_i += 3)
+            for (int i = 0, j = 0; i <= 279; i++, j += 3)
             {
-
                 uint16_t d[2];
-                int d_ok[2];
-                d[0] = ((buf[buf_i + 0] >> 0) |
-                        ((uint16_t)buf[buf_i + 1] << 8)) &
+                d[0] = ((buf[j + 0] >> 0) |
+                        ((uint16_t)buf[j + 1] << 8)) &
                        0xFFF;
-                d[1] = ((buf[buf_i + 1] >> 4) |
-                        ((uint16_t)buf[buf_i + 2] << 4)) &
+                d[1] = ((buf[j + 1] >> 4) |
+                        ((uint16_t)buf[j + 2] << 4)) &
                        0xFFF;
-                d_ok[0] = (d[0] < MLKEM_Q);
-                d_ok[1] = (d[1] < MLKEM_Q);
-                for (int d_i = 0; d_i < 2; d_i++)
+                for (int k = 0; k < 2; k++)
                 {
+                    int d_ok = d[k] < MLKEM_Q;
+#if defined(MLK_SYS_X86_64_AVX512)
+                    int d_k = d[k] * d_ok;
                     int flag = 0;
-                    for (int j = 0; j < MLKEM_N; j++)
+                    int vec = ctr >> 5;
+                    __mmask32 lane = 1 << (ctr & 31);
+                    uint8_t *coeffs = (uint8_t *)poly;
+                    for (int m = 0; m < 8; m++, coeffs += 64)
                     {
-                        int match = (j == ctr);
-                        int mask = match * d_ok[d_i];
+                        int mask = vec == m;
+                        __m512i coeffs_avx = _mm512_load_si512(coeffs);
+                        coeffs_avx = _mm512_mask_set1_epi16(
+                            coeffs_avx,
+                            lane & (__mmask32)-mask,
+                            (int16_t)d_k);
+                        _mm512_store_si512(coeffs, coeffs_avx);
+                        flag += mask;
+                    }
+                    ctr += flag * d_ok;
+#elif defined(MLK_SYS_X86_64_AVX2)
+                    __m256i lane_avx = _mm256_cmpeq_epi16(
+                        _mm256_setr_epi16(
+                            0, 1, 2, 3, 4, 5, 6, 7,
+                            8, 9, 10, 11, 12, 13, 14, 15),
+                        _mm256_set1_epi16(ctr & 15));
+                    __m256i d_avx = _mm256_set1_epi16((int16_t)(d[k] * d_ok));
+                    d_avx = _mm256_and_si256(d_avx, lane_avx);
+                    uint8_t *coeffs = (uint8_t *)v[y].vec[x].coeffs;
+                    int flag = 0;
+                    for (int m = 0; m < 16; m++, coeffs += 32)
+                    {
+                        int mask = (ctr >> 4) == m;
+                        __m256i mask_avx = _mm256_set1_epi16((int16_t)-(mask));
+                        __m256i d_mask_avx = _mm256_and_si256(d_avx, mask_avx);
+                        __m256i coeffs_avx = _mm256_load_si256((const __m256i *)coeffs);
+                        mask_avx = _mm256_and_si256(mask_avx, lane_avx);
+                        coeffs_avx = _mm256_andnot_si256(mask_avx, coeffs_avx);
+                        coeffs_avx = _mm256_or_si256(coeffs_avx, d_mask_avx);
+                        _mm256_store_si256((__m256i *)coeffs, coeffs_avx);
+                        flag += mask;
+                    }
+                    ctr += flag * d_ok;
+#else
+                    int flag = 0;
+                    for (int m = 0; m < MLKEM_N; m++)
+                    {
+                        int match = (m == ctr);
+                        int mask = match * d_ok;
                         int16_t *coeffs = v[y].vec[x].coeffs;
-                        coeffs[j] = (int16_t)(coeffs[j] * (1 - mask) + d[d_i] * mask);
+                        coeffs[m] = (int16_t)(coeffs[m] * (1 - mask) + d[k] * mask);
                         flag += mask;
                     }
                     ctr += flag;
+#endif
                 }
             }
+#if defined(MLK_SYS_X86_64_AVX512)
+            memcpy(&v[y].vec[x].coeffs, poly, sizeof(poly));
+#endif
             mlk_xof_release(&ctx);
         }
     }

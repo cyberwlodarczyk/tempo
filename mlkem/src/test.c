@@ -1,5 +1,4 @@
 #include <string.h>
-#include <stdio.h>
 #include <openssl/rand.h>
 #include "test.h"
 #include "indcpa.h"

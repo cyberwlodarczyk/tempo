@@ -52,6 +52,9 @@
 #if defined(__AVX2__)
 #define MLK_SYS_X86_64_AVX2
 #endif
+#if defined(__AVX512F__) && defined(__AVX512BW__)
+#define MLK_SYS_X86_64_AVX512
+#endif
 #endif /* __x86_64__ */
 
 #if defined(MLK_SYS_LITTLE_ENDIAN) && defined(__powerpc64__)
