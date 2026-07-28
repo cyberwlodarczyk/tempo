@@ -256,7 +256,9 @@
 #undef mlk_kem_check_sk
 #undef mlk_kem_dec
 #undef mlk_kem_enc
+#undef mlk_kem_enc_valid_pk
 #undef mlk_kem_enc_derand
+#undef mlk_kem_enc_derand_valid_pk
 #undef mlk_kem_keypair
 #undef mlk_kem_keypair_derand
 /* mlkem/src/params.h */

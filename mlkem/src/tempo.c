@@ -319,6 +319,11 @@ int mlk_tempo_encaps(
     uint8_t r_seed[TEMPO_3LAMBDA];
     uint8_t v_hash[TEMPO_3LAMBDA];
     uint8_t poly[MLKEM_POLYVECBYTES];
+    ret = mlk_kem_check_pk(apk_v);
+    if (ret != 0)
+    {
+        goto cleanup;
+    }
     h_2(v_hash, sid, pwd, apk_seed, apk_v);
     for (int i = 0; i < TEMPO_3LAMBDA; i++)
     {
@@ -343,7 +348,7 @@ int mlk_tempo_encaps(
     mlk_polyvec_tobytes(poly, &v);
     memcpy(public_key + MLKEM_POLYVECBYTES, apk_seed, MLKEM_SYMBYTES);
     memcpy(public_key, poly, MLKEM_POLYVECBYTES);
-    ret = mlk_kem_enc(ciphertext, ephemeral_key, public_key);
+    ret = mlk_kem_enc_valid_pk(ciphertext, ephemeral_key, public_key);
 #ifdef MLK_CONFIG_TEMPO_FLS185
 cleanup:
 #endif
