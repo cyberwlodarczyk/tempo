@@ -478,6 +478,10 @@ extern "C"
 #endif
 
 #ifdef MLK_CONFIG_PERF
+#ifdef MLK_CONFIG_MULTILEVEL_WITH_SHARED
+    MLK_API_QUALIFIER
+    uint64_t mlkem_perf_randombytes_32();
+#endif
     MLK_API_QUALIFIER
     uint64_t MLK_API_NAMESPACE(perf_gen_vector)();
 

@@ -5,18 +5,32 @@
 #include "tempo.h"
 #include "symmetric.h"
 #include "poly_k.h"
+#include "indcpa.h"
 #include "kem.h"
 
+#ifdef MLK_CONFIG_TEMPO_FLS185
+#define FLS_ITER 185
+#define FLS_XOF_BLOCKS 4
+#define FLS_RETURN int
+#else
+#define FLS_ITER 280
+#define FLS_XOF_BLOCKS 5
+#define FLS_RETURN void
+#endif
+
 #define h_fls MLK_ADD_PARAM_SET(h_fls)
-static void h_fls(
+static FLS_RETURN h_fls(
     mlk_polyvec *v,
     const uint8_t *seed,
     int transposed,
     int n)
 {
-    uint8_t buf[5 * SHAKE128_RATE];
+    uint8_t buf[FLS_XOF_BLOCKS * SHAKE128_RATE];
     uint8_t ext_seed[MLKEM_SYMBYTES + 2];
     memcpy(ext_seed, seed, MLKEM_SYMBYTES);
+#ifdef MLK_CONFIG_TEMPO_FLS185
+    int ret = 1;
+#endif
     for (uint8_t y = 0; y < n; y++)
     {
         ext_seed[MLKEM_SYMBYTES + !transposed] = y;
@@ -28,9 +42,9 @@ static void h_fls(
             ext_seed[MLKEM_SYMBYTES + transposed] = x;
             mlk_xof_ctx ctx;
             mlk_xof_absorb(&ctx, ext_seed, sizeof(ext_seed));
-            mlk_xof_squeezeblocks(buf, 5, &ctx);
+            mlk_xof_squeezeblocks(buf, FLS_XOF_BLOCKS, &ctx);
             int ctr = 0;
-            for (int i = 0, j = 0; i <= 279; i++, j += 3)
+            for (int i = 0, j = 0; i < FLS_ITER; i++, j += 3)
             {
                 uint16_t d[2];
                 d[0] = ((buf[j + 0] >> 0) |
@@ -57,9 +71,9 @@ static void h_fls(
                             lane & (__mmask32)-mask,
                             (int16_t)d_k);
                         _mm512_store_si512(coeffs, coeffs_avx);
-                        flag += mask;
+                        flag |= mask;
                     }
-                    ctr += flag * d_ok;
+                    ctr += flag & d_ok;
 #elif defined(MLK_SYS_X86_64_AVX2)
                     __m256i lane_avx = _mm256_cmpeq_epi16(
                         _mm256_setr_epi16(
@@ -80,9 +94,9 @@ static void h_fls(
                         coeffs_avx = _mm256_andnot_si256(mask_avx, coeffs_avx);
                         coeffs_avx = _mm256_or_si256(coeffs_avx, d_mask_avx);
                         _mm256_store_si256((__m256i *)coeffs, coeffs_avx);
-                        flag += mask;
+                        flag |= mask;
                     }
-                    ctr += flag * d_ok;
+                    ctr += flag & d_ok;
 #else
                     int flag = 0;
                     for (int m = 0; m < MLKEM_N; m++)
@@ -100,15 +114,21 @@ static void h_fls(
 #if defined(MLK_SYS_X86_64_AVX512)
             memcpy(&v[y].vec[x].coeffs, poly, sizeof(poly));
 #endif
+#ifdef MLK_CONFIG_TEMPO_FLS185
+            ret &= ctr == 256;
+#endif
             mlk_xof_release(&ctx);
         }
     }
     mlk_zeroize(buf, sizeof(buf));
     mlk_zeroize(ext_seed, sizeof(ext_seed));
+#ifdef MLK_CONFIG_TEMPO_FLS185
+    return ret;
+#endif
 }
 
 #define h_1 MLK_ADD_PARAM_SET(h_1)
-static void h_1(
+static FLS_RETURN h_1(
     mlk_polyvec *r,
     const uint8_t *sid,
     const uint8_t *pwd,
@@ -128,9 +148,16 @@ static void h_1(
     memcpy(input + (i += TEMPO_LEN_PWD), seed, MLKEM_SYMBYTES);
     memcpy(input + (i += MLKEM_SYMBYTES), r_seed, TEMPO_3LAMBDA);
     mlk_shake256(output, outlen, input, inlen);
+#ifdef MLK_CONFIG_TEMPO_FLS185
+    int ret = h_fls(r, output, 0, 1);
+#else
     h_fls(r, output, 0, 1);
+#endif
     mlk_zeroize(input, inlen);
     mlk_zeroize(output, outlen);
+#ifdef MLK_CONFIG_TEMPO_FLS185
+    return ret;
+#endif
 }
 
 #define h_2 MLK_ADD_PARAM_SET(h_2)
@@ -192,21 +219,29 @@ static inline void h_confirm(
 }
 
 MLK_INTERNAL_API
-void mlk_tempo_gen_vector(
+FLS_RETURN mlk_tempo_gen_vector(
     mlk_polyvec *v,
     uint8_t seed[MLKEM_SYMBYTES],
     int transposed)
 {
+#ifdef MLK_CONFIG_TEMPO_FLS185
+    return h_fls(v, seed, transposed, 1);
+#else
     h_fls(v, seed, transposed, 1);
+#endif
 }
 
 MLK_INTERNAL_API
-void mlk_tempo_gen_matrix(
+FLS_RETURN mlk_tempo_gen_matrix(
     mlk_polymat *a,
     uint8_t seed[MLKEM_SYMBYTES],
     int transposed)
 {
+#ifdef MLK_CONFIG_TEMPO_FLS185
+    return h_fls(a->vec, seed, transposed, MLKEM_K);
+#else
     h_fls(a->vec, seed, transposed, MLKEM_K);
+#endif
 }
 
 MLK_EXTERNAL_API
@@ -233,12 +268,24 @@ int mlk_tempo_keygen(
     }
     memcpy(apk_seed, public_key + MLKEM_POLYVECBYTES, MLKEM_SYMBYTES);
     memcpy(poly, public_key, MLKEM_POLYVECBYTES);
-    if (mlk_randombytes(r_seed, TEMPO_3LAMBDA) != 0)
+#ifdef MLK_CONFIG_TEMPO_FLS185
+    int fls_ret = 0;
+#else
+    int fls_ret = 1;
+#endif
+    do
     {
-        ret = MLK_ERR_RNG_FAIL;
-        goto cleanup;
-    }
-    h_1(&r, sid, pwd, apk_seed, r_seed);
+        if (mlk_randombytes(r_seed, TEMPO_3LAMBDA) != 0)
+        {
+            ret = MLK_ERR_RNG_FAIL;
+            goto cleanup;
+        }
+#ifdef MLK_CONFIG_TEMPO_FLS185
+        fls_ret = h_1(&r, sid, pwd, apk_seed, r_seed);
+#else
+        h_1(&r, sid, pwd, apk_seed, r_seed);
+#endif
+    } while (fls_ret != 1);
     mlk_polyvec_frombytes(&t, poly);
     mlk_polyvec_add(&t, &r);
     mlk_polyvec_reduce(&t);
@@ -271,6 +318,9 @@ int mlk_tempo_encaps(
     const uint8_t *apk_v = apk_u + TEMPO_3LAMBDA;
     const uint8_t *apk_seed = apk_v + MLKEM_POLYVECBYTES;
     mlk_polyvec r;
+#ifdef MLK_CONFIG_TEMPO_FLS185
+    mlk_polyvec rx;
+#endif
     mlk_polyvec v;
     uint8_t r_seed[TEMPO_3LAMBDA];
     uint8_t v_hash[TEMPO_3LAMBDA];
@@ -280,15 +330,33 @@ int mlk_tempo_encaps(
     {
         r_seed[i] = v_hash[i] ^ apk_u[i];
     }
-    h_1(&r, sid, pwd, apk_seed, r_seed);
     mlk_polyvec_frombytes(&v, apk_v);
+#ifdef MLK_CONFIG_TEMPO_FLS185
+    int fls_ret = h_1(&r, sid, pwd, apk_seed, r_seed);
+    uint8_t rx_seed[MLKEM_SYMBYTES];
+    if (mlk_randombytes(rx_seed, MLKEM_SYMBYTES) != 0)
+    {
+        ret = MLK_ERR_RNG_FAIL;
+        goto cleanup;
+    }
+    mlk_gen_vector(&rx, rx_seed, 0);
+    mlk_polyvec_sub_mask(&v, &rx, &r, fls_ret);
+#else
+    h_1(&r, sid, pwd, apk_seed, r_seed);
     mlk_polyvec_sub(&v, &r);
+#endif
     mlk_polyvec_reduce(&v);
     mlk_polyvec_tobytes(poly, &v);
     memcpy(public_key + MLKEM_POLYVECBYTES, apk_seed, MLKEM_SYMBYTES);
     memcpy(public_key, poly, MLKEM_POLYVECBYTES);
     ret = mlk_kem_enc(ciphertext, ephemeral_key, public_key);
+#ifdef MLK_CONFIG_TEMPO_FLS185
+cleanup:
+#endif
     mlk_zeroize(&r, sizeof(r));
+#ifdef MLK_CONFIG_TEMPO_FLS185
+    mlk_zeroize(&rx, sizeof(rx));
+#endif
     mlk_zeroize(&v, sizeof(v));
     mlk_zeroize(r_seed, TEMPO_3LAMBDA);
     mlk_zeroize(v_hash, TEMPO_3LAMBDA);

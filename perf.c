@@ -26,6 +26,7 @@ void perf_run(const char *name, uint64_t f())
 
 int main()
 {
+    perf_run("randombytes_32", mlkem_perf_randombytes_32);
     perf_run("mlkem512_gen_vector", mlkem512_perf_gen_vector);
     perf_run("mlkem512_gen_matrix", mlkem512_perf_gen_matrix);
     perf_run("mlkem512_keypair", mlkem512_perf_keypair);

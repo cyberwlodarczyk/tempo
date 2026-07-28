@@ -15,7 +15,6 @@
 #ifndef MLK_POLY_H
 #define MLK_POLY_H
 
-
 #include "cbmc.h"
 #include "common.h"
 #include "debug.h"
@@ -59,16 +58,17 @@ typedef struct
  *
  **************************************************/
 static MLK_ALWAYS_INLINE int16_t mlk_montgomery_reduce(int32_t a)
-__contract__(
-    requires(a < +(INT32_MAX - (((int32_t)1 << 15) * MLKEM_Q)) &&
-             a > -(INT32_MAX - (((int32_t)1 << 15) * MLKEM_Q)))
-    /* We don't attempt to express an input-dependent output bound
-     * as the post-condition here. There are two call-sites for this
-     * function:
-     * - The base multiplication: Here, we need no output bound.
-     * - mlk_fqmul: Here, we inline this function and prove another spec
-     *          for mlk_fqmul which does have a post-condition bound. */
-)
+    __contract__(
+        requires(a<+(INT32_MAX - (((int32_t)1 << 15) * MLKEM_Q)) &&
+                   a> -
+                 (INT32_MAX - (((int32_t)1 << 15) * MLKEM_Q)))
+        /* We don't attempt to express an input-dependent output bound
+         * as the post-condition here. There are two call-sites for this
+         * function:
+         * - The base multiplication: Here, we need no output bound.
+         * - mlk_fqmul: Here, we inline this function and prove another spec
+         *          for mlk_fqmul which does have a post-condition bound. */
+    )
 {
   /* check-magic: 62209 == unsigned_mod(pow(MLKEM_Q, -1, 2^16), 2^16) */
   const uint32_t QINV = 62209;
@@ -120,11 +120,10 @@ __contract__(
  **************************************************/
 MLK_INTERNAL_API
 void mlk_poly_tomont(mlk_poly *r)
-__contract__(
-  requires(memory_no_alias(r, sizeof(mlk_poly)))
-  assigns(memory_slice(r, sizeof(mlk_poly)))
-  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLKEM_Q))
-);
+    __contract__(
+        requires(memory_no_alias(r, sizeof(mlk_poly)))
+            assigns(memory_slice(r, sizeof(mlk_poly)))
+                ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLKEM_Q)));
 
 #define mlk_poly_mulcache_compute MLK_NAMESPACE(poly_mulcache_compute)
 /************************************************************
@@ -155,11 +154,9 @@ __contract__(
  */
 MLK_INTERNAL_API
 void mlk_poly_mulcache_compute(mlk_poly_mulcache *x, const mlk_poly *a)
-__contract__(
-  requires(memory_no_alias(x, sizeof(mlk_poly_mulcache)))
-  requires(memory_no_alias(a, sizeof(mlk_poly)))
-  assigns(memory_slice(x, sizeof(mlk_poly_mulcache)))
-);
+    __contract__(
+        requires(memory_no_alias(x, sizeof(mlk_poly_mulcache))) requires(memory_no_alias(a, sizeof(mlk_poly)))
+            assigns(memory_slice(x, sizeof(mlk_poly_mulcache))));
 
 #define mlk_poly_reduce MLK_NAMESPACE(poly_reduce)
 /*************************************************
@@ -186,11 +183,10 @@ __contract__(
  */
 MLK_INTERNAL_API
 void mlk_poly_reduce(mlk_poly *r)
-__contract__(
-  requires(memory_no_alias(r, sizeof(mlk_poly)))
-  assigns(memory_slice(r, sizeof(mlk_poly)))
-  ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q))
-);
+    __contract__(
+        requires(memory_no_alias(r, sizeof(mlk_poly)))
+            assigns(memory_slice(r, sizeof(mlk_poly)))
+                ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q)));
 
 #define mlk_poly_add MLK_NAMESPACE(poly_add)
 /************************************************************
@@ -216,14 +212,10 @@ __contract__(
  */
 MLK_INTERNAL_API
 void mlk_poly_add(mlk_poly *r, const mlk_poly *b)
-__contract__(
-  requires(memory_no_alias(r, sizeof(mlk_poly)))
-  requires(memory_no_alias(b, sizeof(mlk_poly)))
-  requires(forall(k0, 0, MLKEM_N, (int32_t) r->coeffs[k0] + b->coeffs[k0] <= INT16_MAX))
-  requires(forall(k1, 0, MLKEM_N, (int32_t) r->coeffs[k1] + b->coeffs[k1] >= INT16_MIN))
-  ensures(forall(k, 0, MLKEM_N, r->coeffs[k] == old(*r).coeffs[k] + b->coeffs[k]))
-  assigns(memory_slice(r, sizeof(mlk_poly)))
-);
+    __contract__(
+        requires(memory_no_alias(r, sizeof(mlk_poly))) requires(memory_no_alias(b, sizeof(mlk_poly))) requires(forall(k0, 0, MLKEM_N, (int32_t)r->coeffs[k0] + b->coeffs[k0] <= INT16_MAX)) requires(forall(k1, 0, MLKEM_N, (int32_t)r->coeffs[k1] + b->coeffs[k1] >= INT16_MIN))
+            ensures(forall(k, 0, MLKEM_N, r->coeffs[k] == old(*r).coeffs[k] + b->coeffs[k]))
+                assigns(memory_slice(r, sizeof(mlk_poly))));
 
 #define mlk_poly_sub MLK_NAMESPACE(poly_sub)
 /*************************************************
@@ -245,14 +237,18 @@ __contract__(
  */
 MLK_INTERNAL_API
 void mlk_poly_sub(mlk_poly *r, const mlk_poly *b)
-__contract__(
-  requires(memory_no_alias(r, sizeof(mlk_poly)))
-  requires(memory_no_alias(b, sizeof(mlk_poly)))
-  requires(forall(k0, 0, MLKEM_N, (int32_t) r->coeffs[k0] - b->coeffs[k0] <= INT16_MAX))
-  requires(forall(k1, 0, MLKEM_N, (int32_t) r->coeffs[k1] - b->coeffs[k1] >= INT16_MIN))
-  ensures(forall(k, 0, MLKEM_N, r->coeffs[k] == old(*r).coeffs[k] - b->coeffs[k]))
-  assigns(memory_slice(r, sizeof(mlk_poly)))
-);
+    __contract__(
+        requires(memory_no_alias(r, sizeof(mlk_poly))) requires(memory_no_alias(b, sizeof(mlk_poly))) requires(forall(k0, 0, MLKEM_N, (int32_t)r->coeffs[k0] - b->coeffs[k0] <= INT16_MAX)) requires(forall(k1, 0, MLKEM_N, (int32_t)r->coeffs[k1] - b->coeffs[k1] >= INT16_MIN))
+            ensures(forall(k, 0, MLKEM_N, r->coeffs[k] == old(*r).coeffs[k] - b->coeffs[k]))
+                assigns(memory_slice(r, sizeof(mlk_poly))));
+
+#define mlk_poly_sub_mask MLK_NAMESPACE(poly_sub_mask)
+MLK_INTERNAL_API
+void mlk_poly_sub_mask(
+    mlk_poly *r,
+    const mlk_poly *a,
+    const mlk_poly *b,
+    int mask);
 
 #define mlk_poly_ntt MLK_NAMESPACE(poly_ntt)
 /*************************************************
@@ -277,12 +273,10 @@ __contract__(
  **************************************************/
 MLK_INTERNAL_API
 void mlk_poly_ntt(mlk_poly *r)
-__contract__(
-  requires(memory_no_alias(r, sizeof(mlk_poly)))
-  requires(array_abs_bound(r->coeffs, 0, MLKEM_N, MLKEM_Q))
-  assigns(memory_slice(r, sizeof(mlk_poly)))
-  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLK_NTT_BOUND))
-);
+    __contract__(
+        requires(memory_no_alias(r, sizeof(mlk_poly))) requires(array_abs_bound(r->coeffs, 0, MLKEM_N, MLKEM_Q))
+            assigns(memory_slice(r, sizeof(mlk_poly)))
+                ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLK_NTT_BOUND)));
 
 #define mlk_poly_invntt_tomont MLK_NAMESPACE(poly_invntt_tomont)
 /*************************************************
@@ -308,10 +302,9 @@ __contract__(
  **************************************************/
 MLK_INTERNAL_API
 void mlk_poly_invntt_tomont(mlk_poly *r)
-__contract__(
-  requires(memory_no_alias(r, sizeof(mlk_poly)))
-  assigns(memory_slice(r, sizeof(mlk_poly)))
-  ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLK_INVNTT_BOUND))
-);
+    __contract__(
+        requires(memory_no_alias(r, sizeof(mlk_poly)))
+            assigns(memory_slice(r, sizeof(mlk_poly)))
+                ensures(array_abs_bound(r->coeffs, 0, MLKEM_N, MLK_INVNTT_BOUND)));
 
 #endif /* !MLK_POLY_H */

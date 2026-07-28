@@ -3,6 +3,12 @@
 
 #include "common.h"
 
+#ifdef MLK_CONFIG_MULTILEVEL_WITH_SHARED
+#define mlk_perf_randombytes_32 MLK_NAMESPACE(perf_randombytes_32)
+MLK_EXTERNAL_API
+uint64_t mlk_perf_randombytes_32();
+#endif
+
 #define mlk_perf_gen_vector MLK_NAMESPACE_K(perf_gen_vector)
 MLK_EXTERNAL_API
 uint64_t mlk_perf_gen_vector();

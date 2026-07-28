@@ -284,6 +284,7 @@
 #undef MLK_PARAMS_H
 /* mlkem/src/perf.h */
 #undef MLK_PERF_H
+#undef mlk_perf_randombytes_32
 #undef mlk_perf_gen_vector
 #undef mlk_perf_gen_matrix
 #undef mlk_perf_keypair
@@ -307,6 +308,7 @@
 #undef mlk_polyvec
 #undef mlk_polyvec_add
 #undef mlk_polyvec_sub
+#undef mlk_polyvec_sub_mask
 #undef mlk_polyvec_basemul_acc_montgomery_cached
 #undef mlk_polyvec_compress_du
 #undef mlk_polyvec_decompress_du
@@ -364,6 +366,7 @@
 #undef mlk_poly_ntt
 #undef mlk_poly_reduce
 #undef mlk_poly_sub
+#undef mlk_poly_sub_mask
 #undef mlk_poly_tomont
 /* mlkem/src/randombytes.h */
 #undef MLK_RANDOMBYTES_H

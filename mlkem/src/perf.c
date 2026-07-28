@@ -7,6 +7,7 @@
 #include "indcpa.h"
 #include "kem.h"
 #include "tempo.h"
+#include "randombytes.h"
 
 #define time_ns MLK_ADD_PARAM_SET(time_ns)
 static uint64_t time_ns()
@@ -15,6 +16,20 @@ static uint64_t time_ns()
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return (uint64_t)ts.tv_sec * 1000000000ULL + (uint64_t)ts.tv_nsec;
 }
+
+#ifdef MLK_CONFIG_MULTILEVEL_WITH_SHARED
+MLK_EXTERNAL_API
+uint64_t mlk_perf_randombytes_32()
+{
+    uint8_t seed[32];
+    uint64_t start = time_ns();
+    if (mlk_randombytes(seed, 32) != 0)
+    {
+        return 0;
+    }
+    return time_ns() - start;
+}
+#endif
 
 MLK_EXTERNAL_API
 uint64_t mlk_perf_gen_vector()

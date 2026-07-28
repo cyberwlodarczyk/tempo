@@ -52,7 +52,7 @@ void mlk_gen_n(
 #define mlk_gen_vector MLK_NAMESPACE_K(gen_vector)
 MLK_INTERNAL_API
 void mlk_gen_vector(
-    mlk_polyvec *a,
+    mlk_polyvec *v,
     const uint8_t seed[MLKEM_SYMBYTES],
     int transposed);
 
