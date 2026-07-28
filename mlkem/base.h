@@ -486,6 +486,12 @@ extern "C"
     uint64_t MLK_API_NAMESPACE(perf_gen_vector)();
 
     MLK_API_QUALIFIER
+    uint64_t MLK_API_NAMESPACE(perf_polyvec_sub)();
+
+    MLK_API_QUALIFIER
+    uint64_t MLK_API_NAMESPACE(perf_polyvec_sub_mask)();
+
+    MLK_API_QUALIFIER
     uint64_t MLK_API_NAMESPACE(perf_gen_matrix)();
 
     MLK_API_QUALIFIER

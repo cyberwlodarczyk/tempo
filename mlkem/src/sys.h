@@ -169,7 +169,11 @@
 #define MLK_RESTRICT restrict
 #endif /* restrict */
 
+#ifdef MLK_SYS_X86_64_AVX512
+#define MLK_DEFAULT_ALIGN 64
+#else
 #define MLK_DEFAULT_ALIGN 32
+#endif
 #define MLK_ALIGN_UP(N) \
   ((((N) + (MLK_DEFAULT_ALIGN - 1)) / MLK_DEFAULT_ALIGN) * MLK_DEFAULT_ALIGN)
 #if defined(__GNUC__)

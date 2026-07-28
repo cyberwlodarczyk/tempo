@@ -41,14 +41,6 @@ void mlk_polymat_permute_bitrev_to_custom(mlk_polymat *a)
             assigns(memory_slice(a, sizeof(mlk_polymat)))
                 ensures(forall(x, 0, MLKEM_K, forall(y, 0, MLKEM_K, array_bound(a->vec[x].vec[y].coeffs, 0, MLKEM_N, 0, MLKEM_Q)))));
 
-#define mlk_gen_n MLK_NAMESPACE_K(gen_n)
-MLK_INTERNAL_API
-void mlk_gen_n(
-    mlk_polyvec *a,
-    const uint8_t seed[MLKEM_SYMBYTES],
-    int transposed,
-    int n);
-
 #define mlk_gen_vector MLK_NAMESPACE_K(gen_vector)
 MLK_INTERNAL_API
 void mlk_gen_vector(

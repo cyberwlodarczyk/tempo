@@ -233,6 +233,7 @@
 #undef MLK_INDCPA_H
 #undef mlk_polyvec_permute_bitrev_to_custom
 #undef mlk_polymat_permute_bitrev_to_custom
+#undef mlk_gen_vector
 #undef mlk_gen_matrix
 #undef mlk_indcpa_dec
 #undef mlk_indcpa_enc
@@ -285,6 +286,8 @@
 /* mlkem/src/perf.h */
 #undef MLK_PERF_H
 #undef mlk_perf_randombytes_32
+#undef mlk_perf_polyvec_sub
+#undef mlk_perf_polyvec_sub_mask
 #undef mlk_perf_gen_vector
 #undef mlk_perf_gen_matrix
 #undef mlk_perf_keypair

@@ -217,37 +217,12 @@ void mlk_polymat_permute_bitrev_to_custom(mlk_polymat *a)
 }
 
 MLK_INTERNAL_API
-void mlk_gen_n(
-    mlk_polyvec *v,
-    const uint8_t seed[MLKEM_SYMBYTES],
-    int transposed,
-    int n)
-{
-    MLK_ALIGN uint8_t seed_ext[MLK_ALIGN_UP(MLKEM_SYMBYTES + 2)];
-    mlk_memcpy(seed_ext, seed, MLKEM_SYMBYTES);
-    for (uint8_t x = 0; x < n; x++)
-    {
-        if (transposed)
-        {
-            seed_ext[MLKEM_SYMBYTES + 0] = 0;
-            seed_ext[MLKEM_SYMBYTES + 1] = x;
-        }
-        else
-        {
-            seed_ext[MLKEM_SYMBYTES + 0] = x;
-            seed_ext[MLKEM_SYMBYTES + 1] = 0;
-        }
-        mlk_poly_rej_uniform(&v->vec[x], seed_ext);
-    }
-}
-
-MLK_INTERNAL_API
 void mlk_gen_vector(
     mlk_polyvec *v,
     const uint8_t seed[MLKEM_SYMBYTES],
     int transposed)
 {
-#if MLKEM_K == 4 && !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
+#if !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
     MLK_ALIGN uint8_t seed_ext[4][MLK_ALIGN_UP(MLKEM_SYMBYTES + 2)];
     for (uint8_t x = 0; x < 4; x++)
     {
@@ -263,14 +238,50 @@ void mlk_gen_vector(
             seed_ext[x][MLKEM_SYMBYTES + 1] = 0;
         }
     }
+#if MLKEM_K == 4
     mlk_poly_rej_uniform_x4(
         &v->vec[0],
         &v->vec[1],
         &v->vec[2],
         &v->vec[3],
         seed_ext);
+#elif MLKEM_K == 3
+    mlk_poly p4;
+    mlk_poly_rej_uniform_x4(
+        &v->vec[0],
+        &v->vec[1],
+        &v->vec[2],
+        &p4,
+        seed_ext);
+    mlk_zeroize(&p4, sizeof(mlk_poly));
+#elif MLKEM_K == 2
+    mlk_poly p3, p4;
+    mlk_poly_rej_uniform_x4(
+        &v->vec[0],
+        &v->vec[1],
+        &p3,
+        &p4,
+        seed_ext);
+    mlk_zeroize(&p3, sizeof(mlk_poly));
+    mlk_zeroize(&p4, sizeof(mlk_poly));
+#endif
 #else
-    mlk_gen_n(v, seed, transposed, MLKEM_K);
+    MLK_ALIGN uint8_t seed_ext[MLK_ALIGN_UP(MLKEM_SYMBYTES + 2)];
+    mlk_memcpy(seed_ext, seed, MLKEM_SYMBYTES);
+    for (uint8_t x = 0; x < MLKEM_K; x++)
+    {
+        if (transposed)
+        {
+            seed_ext[MLKEM_SYMBYTES + 0] = 0;
+            seed_ext[MLKEM_SYMBYTES + 1] = x;
+        }
+        else
+        {
+            seed_ext[MLKEM_SYMBYTES + 0] = x;
+            seed_ext[MLKEM_SYMBYTES + 1] = 0;
+        }
+        mlk_poly_rej_uniform(&v->vec[x], seed_ext);
+    }
 #endif
     mlk_polyvec_permute_bitrev_to_custom(v);
 }

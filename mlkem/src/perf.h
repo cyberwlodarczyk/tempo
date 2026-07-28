@@ -9,6 +9,14 @@ MLK_EXTERNAL_API
 uint64_t mlk_perf_randombytes_32();
 #endif
 
+#define mlk_perf_polyvec_sub MLK_NAMESPACE_K(perf_polyvec_sub)
+MLK_EXTERNAL_API
+uint64_t mlk_perf_polyvec_sub();
+
+#define mlk_perf_polyvec_sub_mask MLK_NAMESPACE_K(perf_polyvec_sub_mask)
+MLK_EXTERNAL_API
+uint64_t mlk_perf_polyvec_sub_mask();
+
 #define mlk_perf_gen_vector MLK_NAMESPACE_K(perf_gen_vector)
 MLK_EXTERNAL_API
 uint64_t mlk_perf_gen_vector();

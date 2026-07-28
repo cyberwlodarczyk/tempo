@@ -36,9 +36,6 @@ static FLS_RETURN h_fls(
         ext_seed[MLKEM_SYMBYTES + !transposed] = y;
         for (uint8_t x = 0; x < MLKEM_K; x++)
         {
-#if defined(MLK_SYS_X86_64_AVX512)
-            __attribute__((aligned(64))) int16_t poly[MLKEM_N];
-#endif
             ext_seed[MLKEM_SYMBYTES + transposed] = x;
             mlk_xof_ctx ctx;
             mlk_xof_absorb(&ctx, ext_seed, sizeof(ext_seed));
@@ -61,7 +58,7 @@ static FLS_RETURN h_fls(
                     int flag = 0;
                     int vec = ctr >> 5;
                     __mmask32 lane = 1 << (ctr & 31);
-                    uint8_t *coeffs = (uint8_t *)poly;
+                    uint8_t *coeffs = (uint8_t *)v[y].vec[x].coeffs;
                     for (int m = 0; m < 8; m++, coeffs += 64)
                     {
                         int mask = vec == m;
@@ -111,9 +108,6 @@ static FLS_RETURN h_fls(
 #endif
                 }
             }
-#if defined(MLK_SYS_X86_64_AVX512)
-            memcpy(&v[y].vec[x].coeffs, poly, sizeof(poly));
-#endif
 #ifdef MLK_CONFIG_TEMPO_FLS185
             ret &= ctr == 256;
 #endif

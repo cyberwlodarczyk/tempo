@@ -32,6 +32,42 @@ uint64_t mlk_perf_randombytes_32()
 #endif
 
 MLK_EXTERNAL_API
+uint64_t mlk_perf_polyvec_sub()
+{
+    uint8_t seed1[MLKEM_SYMBYTES];
+    RAND_bytes(seed1, MLKEM_SYMBYTES);
+    mlk_polyvec v1;
+    mlk_gen_vector(&v1, seed1, 0);
+    uint8_t seed2[MLKEM_SYMBYTES];
+    RAND_bytes(seed2, MLKEM_SYMBYTES);
+    mlk_polyvec v2;
+    mlk_gen_vector(&v2, seed1, 0);
+    uint64_t start = time_ns();
+    mlk_polyvec_sub(&v1, &v2);
+    return time_ns() - start;
+}
+
+MLK_EXTERNAL_API
+uint64_t mlk_perf_polyvec_sub_mask()
+{
+    uint8_t seed1[MLKEM_SYMBYTES];
+    RAND_bytes(seed1, MLKEM_SYMBYTES);
+    mlk_polyvec v1;
+    mlk_gen_vector(&v1, seed1, 0);
+    uint8_t seed2[MLKEM_SYMBYTES];
+    RAND_bytes(seed2, MLKEM_SYMBYTES);
+    mlk_polyvec v2;
+    mlk_gen_vector(&v2, seed1, 0);
+    uint8_t seed3[MLKEM_SYMBYTES];
+    RAND_bytes(seed3, MLKEM_SYMBYTES);
+    mlk_polyvec v3;
+    mlk_gen_vector(&v3, seed1, 0);
+    uint64_t start = time_ns();
+    mlk_polyvec_sub_mask(&v1, &v2, &v3, 0);
+    return time_ns() - start;
+}
+
+MLK_EXTERNAL_API
 uint64_t mlk_perf_gen_vector()
 {
     uint8_t seed[MLKEM_SYMBYTES];
