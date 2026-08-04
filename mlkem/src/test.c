@@ -40,63 +40,23 @@ static int test_tempo_exchange(uint8_t *pwd1, uint8_t *pwd2)
     uint8_t pk1[MLKEM_INDCCA_LEN_PUBLIC_KEY];
     uint8_t sk[MLKEM_INDCCA_LEN_SECRET_KEY];
     uint8_t apk[TEMPO_LEN_APK];
-    if (mlk_tempo_keygen(pk1, sk, apk, sid, pwd1) != 0)
+    if (mlk_tempo_keygen(pk1, apk, sk, sid, pwd1) != 0)
     {
         return -1;
     }
-    uint8_t pk2[MLKEM_INDCCA_LEN_PUBLIC_KEY];
+    uint8_t ss2[TEMPO_LEN_SHARED_SECRET];
     uint8_t ct[MLKEM_INDCCA_LEN_CIPHERTEXT];
-    uint8_t ek1[MLKEM_SSBYTES];
-    if (mlk_tempo_encaps(
-            pk2,
-            ct,
-            ek1,
-            sid,
-            pwd2,
-            apk) != 0)
+    uint8_t tag[TEMPO_LEN_TAG];
+    if (mlk_tempo_encaps(ss2, ct, tag, apk, sid, pwd2) != 0)
     {
         return -1;
     }
-    uint8_t ek2[MLKEM_SSBYTES];
-    if (mlk_tempo_decaps(ek2, sk, ct) != 0)
+    uint8_t ss1[TEMPO_LEN_SHARED_SECRET];
+    if (mlk_tempo_decaps(ss1, pk1, apk, sk, ct, tag, sid, pwd1) != 0)
     {
         return -1;
     }
-    uint8_t tag_a_a[TEMPO_LEN_TAG];
-    uint8_t tag_b_a[TEMPO_LEN_TAG];
-    uint8_t shared_secret_a[TEMPO_LEN_SHARED_SECRET];
-    mlk_tempo_confirm(
-        tag_a_a,
-        tag_b_a,
-        shared_secret_a,
-        sid,
-        pwd1,
-        apk,
-        ct,
-        pk1,
-        ek2);
-    uint8_t tag_a_b[TEMPO_LEN_TAG];
-    uint8_t tag_b_b[TEMPO_LEN_TAG];
-    uint8_t shared_secret_b[TEMPO_LEN_SHARED_SECRET];
-    mlk_tempo_confirm(
-        tag_a_b,
-        tag_b_b,
-        shared_secret_b,
-        sid,
-        pwd2,
-        apk,
-        ct,
-        pk2,
-        ek1);
-    if (mlk_tempo_verify(tag_a_a, tag_a_b) != 0)
-    {
-        return -1;
-    }
-    if (mlk_tempo_verify(tag_b_a, tag_b_b) != 0)
-    {
-        return -1;
-    }
-    if (memcmp(shared_secret_a, shared_secret_b, TEMPO_LEN_SHARED_SECRET) != 0)
+    if (memcmp(ss1, ss2, TEMPO_LEN_SHARED_SECRET) != 0)
     {
         return -1;
     }

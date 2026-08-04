@@ -171,14 +171,14 @@ MLK_EXTERNAL_API
 uint64_t mlk_perf_tempo_keygen()
 {
     uint8_t pk[MLKEM_INDCCA_LEN_PUBLIC_KEY];
-    uint8_t sk[MLKEM_INDCCA_LEN_SECRET_KEY];
     uint8_t apk[TEMPO_LEN_APK];
+    uint8_t sk[MLKEM_INDCCA_LEN_SECRET_KEY];
     uint8_t sid[TEMPO_LEN_SID];
     RAND_bytes(sid, TEMPO_LEN_SID);
     uint8_t pwd[TEMPO_LEN_PWD];
     RAND_bytes(pwd, TEMPO_LEN_PWD);
     uint64_t start = time_ns();
-    if (mlk_tempo_keygen(pk, sk, apk, sid, pwd) != 0)
+    if (mlk_tempo_keygen(pk, apk, sk, sid, pwd) != 0)
     {
         return 0;
     }
@@ -189,21 +189,51 @@ MLK_EXTERNAL_API
 uint64_t mlk_perf_tempo_encaps()
 {
     uint8_t pk1[MLKEM_INDCCA_LEN_PUBLIC_KEY];
-    uint8_t sk[MLKEM_INDCCA_LEN_SECRET_KEY];
     uint8_t apk[TEMPO_LEN_APK];
+    uint8_t sk[MLKEM_INDCCA_LEN_SECRET_KEY];
     uint8_t sid[TEMPO_LEN_SID];
     RAND_bytes(sid, TEMPO_LEN_SID);
     uint8_t pwd[TEMPO_LEN_PWD];
     RAND_bytes(pwd, TEMPO_LEN_PWD);
-    if (mlk_tempo_keygen(pk1, sk, apk, sid, pwd) != 0)
+    if (mlk_tempo_keygen(pk1, apk, sk, sid, pwd) != 0)
     {
         return 0;
     }
-    uint8_t pk2[MLKEM_INDCCA_LEN_PUBLIC_KEY];
+    uint8_t ss[TEMPO_LEN_SHARED_SECRET];
     uint8_t ct[MLKEM_INDCCA_LEN_CIPHERTEXT];
-    uint8_t ek[MLKEM_SSBYTES];
+    uint8_t tag[TEMPO_LEN_TAG];
     uint64_t start = time_ns();
-    if (mlk_tempo_encaps(pk2, ct, ek, sid, pwd, apk) != 0)
+    if (mlk_tempo_encaps(ss, ct, tag, apk, sid, pwd) != 0)
+    {
+        return 0;
+    }
+    return time_ns() - start;
+}
+
+MLK_EXTERNAL_API
+uint64_t mlk_perf_tempo_decaps()
+{
+    uint8_t pk1[MLKEM_INDCCA_LEN_PUBLIC_KEY];
+    uint8_t apk[TEMPO_LEN_APK];
+    uint8_t sk[MLKEM_INDCCA_LEN_SECRET_KEY];
+    uint8_t sid[TEMPO_LEN_SID];
+    RAND_bytes(sid, TEMPO_LEN_SID);
+    uint8_t pwd[TEMPO_LEN_PWD];
+    RAND_bytes(pwd, TEMPO_LEN_PWD);
+    if (mlk_tempo_keygen(pk1, apk, sk, sid, pwd) != 0)
+    {
+        return 0;
+    }
+    uint8_t ss1[TEMPO_LEN_SHARED_SECRET];
+    uint8_t ct[MLKEM_INDCCA_LEN_CIPHERTEXT];
+    uint8_t tag[TEMPO_LEN_TAG];
+    if (mlk_tempo_encaps(ss1, ct, tag, apk, sid, pwd) != 0)
+    {
+        return 0;
+    }
+    uint8_t ss2[TEMPO_LEN_SHARED_SECRET];
+    uint64_t start = time_ns();
+    if (mlk_tempo_decaps(ss2, pk1, apk, sk, ct, tag, sid, pwd) != 0)
     {
         return 0;
     }

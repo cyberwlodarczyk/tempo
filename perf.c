@@ -52,13 +52,16 @@ int main()
     perf_run("tempo512_gen_matrix", tempo512_perf_gen_matrix);
     perf_run("tempo512_keygen", tempo512_perf_keygen);
     perf_run("tempo512_encaps", tempo512_perf_encaps);
+    perf_run("tempo512_decaps", tempo512_perf_decaps);
     perf_run("tempo768_gen_vector", tempo768_perf_gen_vector);
     perf_run("tempo768_gen_matrix", tempo768_perf_gen_matrix);
     perf_run("tempo768_keygen", tempo768_perf_keygen);
     perf_run("tempo768_encaps", tempo768_perf_encaps);
+    perf_run("tempo768_decaps", tempo768_perf_decaps);
     perf_run("tempo1024_gen_vector", tempo1024_perf_gen_vector);
     perf_run("tempo1024_gen_matrix", tempo1024_perf_gen_matrix);
     perf_run("tempo1024_keygen", tempo1024_perf_keygen);
     perf_run("tempo1024_encaps", tempo1024_perf_encaps);
+    perf_run("tempo1024_decaps", tempo1024_perf_decaps);
     return EXIT_SUCCESS;
 }

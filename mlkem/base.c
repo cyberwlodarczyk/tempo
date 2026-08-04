@@ -299,6 +299,7 @@
 #undef mlk_perf_tempo_gen_matrix
 #undef mlk_perf_tempo_keygen
 #undef mlk_perf_tempo_encaps
+#undef mlk_perf_tempo_decaps
 /* mlkem/src/poly_k.h */
 #undef MLK_POLY_K_H
 #undef mlk_poly_compress_du

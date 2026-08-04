@@ -28,9 +28,9 @@ MLK_TEMPO_FLS_RETURN mlk_tempo_gen_matrix(
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int mlk_tempo_keygen(
-    uint8_t *public_key,
-    uint8_t *secret_key,
+    uint8_t *pk,
     uint8_t *apk,
+    uint8_t *sk,
     const uint8_t *sid,
     const uint8_t *pwd);
 
@@ -38,37 +38,24 @@ int mlk_tempo_keygen(
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int mlk_tempo_encaps(
-    uint8_t *public_key,
-    uint8_t *ciphertext,
-    uint8_t *ephemeral_key,
+    uint8_t *ss,
+    uint8_t *ct,
+    uint8_t *tag,
+    const uint8_t *apk,
     const uint8_t *sid,
-    const uint8_t *pwd,
-    const uint8_t *apk);
+    const uint8_t *pwd);
 
 #define mlk_tempo_decaps MLK_TEMPO_NAMESPACE_K(decaps)
 MLK_EXTERNAL_API
 MLK_MUST_CHECK_RETURN_VALUE
 int mlk_tempo_decaps(
-    uint8_t *ephemeral_key,
-    const uint8_t *secret_key,
-    const uint8_t *ciphertext);
-
-#define mlk_tempo_confirm MLK_TEMPO_NAMESPACE_K(confirm)
-MLK_EXTERNAL_API
-void mlk_tempo_confirm(
-    uint8_t *tag_a,
-    uint8_t *tag_b,
-    uint8_t *shared_secret,
-    const uint8_t *sid,
-    const uint8_t *pwd,
+    uint8_t *ss,
+    const uint8_t *pk,
     const uint8_t *apk,
-    const uint8_t *ciphertext,
-    const uint8_t *public_key,
-    const uint8_t *ephemeral_key);
-
-#define mlk_tempo_verify MLK_TEMPO_NAMESPACE_K(verify)
-MLK_EXTERNAL_API
-MLK_MUST_CHECK_RETURN_VALUE
-int mlk_tempo_verify(const uint8_t *tag, const uint8_t *peer_tag);
+    const uint8_t *sk,
+    const uint8_t *ct,
+    const uint8_t *tag,
+    const uint8_t *sid,
+    const uint8_t *pwd);
 
 #endif

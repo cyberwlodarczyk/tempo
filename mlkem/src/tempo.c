@@ -178,15 +178,14 @@ static void h_2(
 
 #define h_confirm MLK_ADD_PARAM_SET(h_confirm)
 static inline void h_confirm(
-    uint8_t *tag_a,
-    uint8_t *tag_b,
+    uint8_t *tag,
     uint8_t *shared_secret,
     const uint8_t *sid,
     const uint8_t *pwd,
     const uint8_t *public_key,
     const uint8_t *apk,
     const uint8_t *ciphertext,
-    const uint8_t *emphemeral_key)
+    const uint8_t *key)
 {
     const size_t inlen = TEMPO_LEN_SID +
                          TEMPO_LEN_PWD +
@@ -194,7 +193,7 @@ static inline void h_confirm(
                          TEMPO_LEN_APK +
                          MLKEM_INDCCA_LEN_CIPHERTEXT +
                          MLKEM_SSBYTES;
-    const size_t outlen = 2 * TEMPO_LEN_TAG + TEMPO_LEN_SHARED_SECRET;
+    const size_t outlen = TEMPO_LEN_TAG + TEMPO_LEN_SHARED_SECRET;
     uint8_t input[inlen];
     uint8_t output[outlen];
     size_t i = 0;
@@ -203,11 +202,10 @@ static inline void h_confirm(
     memcpy(input + (i += TEMPO_LEN_PWD), public_key, MLKEM_INDCCA_LEN_PUBLIC_KEY);
     memcpy(input + (i += MLKEM_INDCCA_LEN_PUBLIC_KEY), apk, TEMPO_LEN_APK);
     memcpy(input + (i += TEMPO_LEN_APK), ciphertext, MLKEM_INDCCA_LEN_CIPHERTEXT);
-    memcpy(input + (i += MLKEM_INDCCA_LEN_CIPHERTEXT), emphemeral_key, MLKEM_SSBYTES);
+    memcpy(input + (i += MLKEM_INDCCA_LEN_CIPHERTEXT), key, MLKEM_SSBYTES);
     mlk_shake256(output, outlen, input, inlen);
-    memcpy(tag_a, output, TEMPO_LEN_TAG);
-    memcpy(tag_b, output + TEMPO_LEN_TAG, TEMPO_LEN_TAG);
-    memcpy(shared_secret, output + 2 * TEMPO_LEN_TAG, TEMPO_LEN_SHARED_SECRET);
+    memcpy(tag, output, TEMPO_LEN_TAG);
+    memcpy(shared_secret, output + TEMPO_LEN_TAG, TEMPO_LEN_SHARED_SECRET);
     mlk_zeroize(input, inlen);
     mlk_zeroize(output, outlen);
 }
@@ -240,9 +238,9 @@ FLS_RETURN mlk_tempo_gen_matrix(
 
 MLK_EXTERNAL_API
 int mlk_tempo_keygen(
-    uint8_t *public_key,
-    uint8_t *secret_key,
+    uint8_t *pk,
     uint8_t *apk,
+    uint8_t *sk,
     const uint8_t *sid,
     const uint8_t *pwd)
 {
@@ -255,13 +253,13 @@ int mlk_tempo_keygen(
     uint8_t poly[MLKEM_POLYVECBYTES];
     uint8_t r_seed[TEMPO_3LAMBDA];
     uint8_t v_hash[TEMPO_3LAMBDA];
-    ret = mlk_kem_keypair(public_key, secret_key);
+    ret = mlk_kem_keypair(pk, sk);
     if (ret != 0)
     {
         goto cleanup;
     }
-    memcpy(apk_seed, public_key + MLKEM_POLYVECBYTES, MLKEM_SYMBYTES);
-    memcpy(poly, public_key, MLKEM_POLYVECBYTES);
+    memcpy(apk_seed, pk + MLKEM_POLYVECBYTES, MLKEM_SYMBYTES);
+    memcpy(poly, pk, MLKEM_POLYVECBYTES);
 #ifdef MLK_CONFIG_TEMPO_FLS185
     int fls_ret = 0;
 #else
@@ -300,12 +298,12 @@ cleanup:
 
 MLK_EXTERNAL_API
 int mlk_tempo_encaps(
-    uint8_t *public_key,
-    uint8_t *ciphertext,
-    uint8_t *ephemeral_key,
+    uint8_t *ss,
+    uint8_t *ct,
+    uint8_t *tag,
+    const uint8_t *apk,
     const uint8_t *sid,
-    const uint8_t *pwd,
-    const uint8_t *apk)
+    const uint8_t *pwd)
 {
     int ret = 0;
     const uint8_t *apk_u = apk;
@@ -318,7 +316,8 @@ int mlk_tempo_encaps(
     mlk_polyvec v;
     uint8_t r_seed[TEMPO_3LAMBDA];
     uint8_t v_hash[TEMPO_3LAMBDA];
-    uint8_t poly[MLKEM_POLYVECBYTES];
+    uint8_t pk[MLKEM_INDCCA_LEN_PUBLIC_KEY];
+    uint8_t key[MLKEM_SSBYTES];
     ret = mlk_kem_check_pk(apk_v);
     if (ret != 0)
     {
@@ -345,13 +344,15 @@ int mlk_tempo_encaps(
     mlk_polyvec_sub(&v, &r);
 #endif
     mlk_polyvec_reduce(&v);
-    mlk_polyvec_tobytes(poly, &v);
-    memcpy(public_key + MLKEM_POLYVECBYTES, apk_seed, MLKEM_SYMBYTES);
-    memcpy(public_key, poly, MLKEM_POLYVECBYTES);
-    ret = mlk_kem_enc_valid_pk(ciphertext, ephemeral_key, public_key);
-#ifdef MLK_CONFIG_TEMPO_FLS185
+    mlk_polyvec_tobytes(pk, &v);
+    memcpy(pk + MLKEM_POLYVECBYTES, apk_seed, MLKEM_SYMBYTES);
+    ret = mlk_kem_enc_valid_pk(ct, key, pk);
+    if (ret != 0)
+    {
+        goto cleanup;
+    }
+    h_confirm(tag, ss, sid, pwd, pk, apk, ct, key);
 cleanup:
-#endif
     mlk_zeroize(&r, sizeof(r));
 #ifdef MLK_CONFIG_TEMPO_FLS185
     mlk_zeroize(&rx, sizeof(rx));
@@ -359,47 +360,47 @@ cleanup:
     mlk_zeroize(&v, sizeof(v));
     mlk_zeroize(r_seed, TEMPO_3LAMBDA);
     mlk_zeroize(v_hash, TEMPO_3LAMBDA);
-    mlk_zeroize(poly, MLKEM_POLYVECBYTES);
+    mlk_zeroize(pk, MLKEM_INDCCA_LEN_PUBLIC_KEY);
+    mlk_zeroize(key, MLKEM_SSBYTES);
     return ret;
 }
 
 MLK_EXTERNAL_API
 int mlk_tempo_decaps(
-    uint8_t *ephemeral_key,
-    const uint8_t *secret_key,
-    const uint8_t *ciphertext)
-{
-    return mlk_kem_dec(ephemeral_key, ciphertext, secret_key);
-}
-
-MLK_EXTERNAL_API
-void mlk_tempo_confirm(
-    uint8_t *tag_a,
-    uint8_t *tag_b,
-    uint8_t *shared_secret,
-    const uint8_t *sid,
-    const uint8_t *pwd,
+    uint8_t *ss,
+    const uint8_t *pk,
     const uint8_t *apk,
-    const uint8_t *ciphertext,
-    const uint8_t *public_key,
-    const uint8_t *ephemeral_key)
+    const uint8_t *sk,
+    const uint8_t *ct,
+    const uint8_t *tag,
+    const uint8_t *sid,
+    const uint8_t *pwd)
 {
-    h_confirm(
-        tag_a,
-        tag_b,
-        shared_secret,
-        sid,
-        pwd,
-        public_key,
-        apk,
-        ciphertext,
-        ephemeral_key);
-}
-
-MLK_EXTERNAL_API
-int mlk_tempo_verify(const uint8_t *tag, const uint8_t *peer_tag)
-{
-    return mlk_ct_memcmp(tag, peer_tag, TEMPO_LEN_TAG);
+    int ret = 0;
+    uint8_t key[MLKEM_SSBYTES];
+    uint8_t tag2[TEMPO_LEN_TAG];
+    uint8_t ss1[TEMPO_LEN_SHARED_SECRET];
+    uint8_t ss2[TEMPO_LEN_SHARED_SECRET];
+    ret = mlk_kem_dec(key, ct, sk);
+    if (ret != 0)
+    {
+        goto cleanup;
+    }
+    h_confirm(tag2, ss1, sid, pwd, pk, apk, ct, key);
+    if (mlk_randombytes(ss2, TEMPO_LEN_SHARED_SECRET) != 0)
+    {
+        ret = MLK_ERR_RNG_FAIL;
+        goto cleanup;
+    }
+    uint8_t ok = mlk_ct_memcmp(tag, tag2, TEMPO_LEN_TAG) == 0;
+    mlk_ct_cmov_zero(ss, ss1, TEMPO_LEN_SHARED_SECRET, !ok);
+    mlk_ct_cmov_zero(ss, ss2, TEMPO_LEN_SHARED_SECRET, ok);
+cleanup:
+    mlk_zeroize(key, MLKEM_SSBYTES);
+    mlk_zeroize(tag2, TEMPO_LEN_TAG);
+    mlk_zeroize(ss1, TEMPO_LEN_SHARED_SECRET);
+    mlk_zeroize(ss2, TEMPO_LEN_SHARED_SECRET);
+    return ret;
 }
 
 #undef h_fls

@@ -53,4 +53,8 @@ uint64_t mlk_perf_tempo_keygen();
 MLK_EXTERNAL_API
 uint64_t mlk_perf_tempo_encaps();
 
+#define mlk_perf_tempo_decaps MLK_TEMPO_NAMESPACE_K(perf_decaps)
+MLK_EXTERNAL_API
+uint64_t mlk_perf_tempo_decaps();
+
 #endif
