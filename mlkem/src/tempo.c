@@ -18,6 +18,14 @@
 #define FLS_RETURN void
 #endif
 
+// https://github.com/afonsoarriaga/ProjectTempo
+#define lt_1mask_16(x, y) (uint16_t)((((int16_t)x) - ((int16_t)y)) >> 15)         // 0xffffffff if  x < y, 0x00000000 otherwise
+#define diff_1mask_16(x, y) (uint16_t)((0 - ((int16_t)((x ^ y) & 0x7fff))) >> 15) // 0xffffffff if x != y, 0x00000000 otherwise
+#define eq_1mask_16(x, y) (uint16_t)(~diff_1mask_16(x, y))                        // 0xffffffff if x == y, 0x00000000 otherwise
+
+#define diff_1mask_32(x, y) (uint32_t)((0 - ((int32_t)((x ^ y) & 0x7fffffff))) >> 31)
+#define eq_1mask_32(x, y) (uint32_t)(~diff_1mask_32(x, y))
+
 #define h_fls MLK_ADD_PARAM_SET(h_fls)
 static FLS_RETURN h_fls(
     mlk_polyvec *v,
@@ -40,7 +48,7 @@ static FLS_RETURN h_fls(
             mlk_xof_ctx ctx;
             mlk_xof_absorb(&ctx, ext_seed, sizeof(ext_seed));
             mlk_xof_squeezeblocks(buf, FLS_XOF_BLOCKS, &ctx);
-            int ctr = 0;
+            uint16_t ctr = 0;
             for (int i = 0, j = 0; i < FLS_ITER; i++, j += 3)
             {
                 uint16_t d[2];
@@ -52,64 +60,58 @@ static FLS_RETURN h_fls(
                        0xFFF;
                 for (int k = 0; k < 2; k++)
                 {
-                    int d_ok = d[k] < MLKEM_Q;
+                    uint16_t d_ok = lt_1mask_16(d[k], MLKEM_Q);
 #if defined(MLK_SYS_X86_64_AVX512)
-                    int d_k = d[k] * d_ok;
-                    int flag = 0;
-                    int vec = ctr >> 5;
-                    __mmask32 lane = 1 << (ctr & 31);
+                    uint16_t d_k = d[k] & d_ok;
                     uint8_t *coeffs = (uint8_t *)v[y].vec[x].coeffs;
-                    for (int m = 0; m < 8; m++, coeffs += 64)
+                    uint32_t vec = ctr >> 5;
+                    uint32_t lane = 1 << (ctr & 31);
+                    for (uint32_t m = 0; m < 8; m++, coeffs += 64)
                     {
-                        int mask = vec == m;
+                        uint32_t mask = eq_1mask_32(vec, m);
                         __m512i coeffs_avx = _mm512_load_si512(coeffs);
                         coeffs_avx = _mm512_mask_set1_epi16(
                             coeffs_avx,
-                            lane & (__mmask32)-mask,
+                            lane & mask,
                             (int16_t)d_k);
                         _mm512_store_si512(coeffs, coeffs_avx);
-                        flag |= mask;
                     }
-                    ctr += flag & d_ok;
 #elif defined(MLK_SYS_X86_64_AVX2)
+                    uint16_t d_k = d[k] & d_ok;
+                    uint8_t *coeffs = (uint8_t *)v[y].vec[x].coeffs;
+                    uint16_t vec = ctr >> 4;
                     __m256i lane_avx = _mm256_cmpeq_epi16(
                         _mm256_setr_epi16(
                             0, 1, 2, 3, 4, 5, 6, 7,
                             8, 9, 10, 11, 12, 13, 14, 15),
                         _mm256_set1_epi16(ctr & 15));
-                    __m256i d_avx = _mm256_set1_epi16((int16_t)(d[k] * d_ok));
+                    __m256i d_avx = _mm256_set1_epi16((int16_t)d_k);
                     d_avx = _mm256_and_si256(d_avx, lane_avx);
-                    uint8_t *coeffs = (uint8_t *)v[y].vec[x].coeffs;
-                    int flag = 0;
-                    for (int m = 0; m < 16; m++, coeffs += 32)
+                    for (uint16_t m = 0; m < 16; m++, coeffs += 32)
                     {
-                        int mask = (ctr >> 4) == m;
-                        __m256i mask_avx = _mm256_set1_epi16((int16_t)-(mask));
+                        uint16_t mask = eq_1mask_16(vec, m);
+                        __m256i mask_avx = _mm256_set1_epi16((int16_t)mask);
                         __m256i d_mask_avx = _mm256_and_si256(d_avx, mask_avx);
                         __m256i coeffs_avx = _mm256_load_si256((const __m256i *)coeffs);
                         mask_avx = _mm256_and_si256(mask_avx, lane_avx);
                         coeffs_avx = _mm256_andnot_si256(mask_avx, coeffs_avx);
                         coeffs_avx = _mm256_or_si256(coeffs_avx, d_mask_avx);
                         _mm256_store_si256((__m256i *)coeffs, coeffs_avx);
-                        flag |= mask;
                     }
-                    ctr += flag & d_ok;
 #else
-                    int flag = 0;
-                    for (int m = 0; m < MLKEM_N; m++)
+                    int16_t *coeffs = v[y].vec[x].coeffs;
+                    for (uint16_t m = 0; m < MLKEM_N; m++)
                     {
-                        int match = (m == ctr);
-                        int mask = match * d_ok;
-                        int16_t *coeffs = v[y].vec[x].coeffs;
-                        coeffs[m] = (int16_t)(coeffs[m] * (1 - mask) + d[k] * mask);
-                        flag += mask;
+                        uint16_t match = eq_1mask_16(m, ctr);
+                        coeffs[m] = (int16_t)((~match & (uint16_t)coeffs[m]) |
+                                              (match & d[k]));
                     }
-                    ctr += flag;
 #endif
+                    ctr += d_ok & 1;
                 }
             }
 #ifdef MLK_CONFIG_TEMPO_FLS185
-            ret &= ctr == 256;
+            ret &= (ctr >> 8);
 #endif
             mlk_xof_release(&ctx);
         }

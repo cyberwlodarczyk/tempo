@@ -89,7 +89,14 @@ int mlk_test_tempo_gen_vector(void)
     mlk_polyvec v1;
     mlk_gen_vector(&v1, seed, 0);
     mlk_polyvec v2;
+#ifdef MLK_CONFIG_TEMPO_FLS185
+    if (mlk_tempo_gen_vector(&v2, seed, 0) != 1)
+    {
+        return -1;
+    }
+#else
     mlk_tempo_gen_vector(&v2, seed, 0);
+#endif
     mlk_polyvec_permute_bitrev_to_custom(&v2);
     for (int j = 0; j < MLKEM_K; j++)
     {
@@ -112,7 +119,14 @@ int mlk_test_tempo_gen_matrix(void)
     mlk_polymat a1;
     mlk_gen_matrix(&a1, seed, 0);
     mlk_polymat a2;
+#ifdef MLK_CONFIG_TEMPO_FLS185
+    if (mlk_tempo_gen_matrix(&a2, seed, 0) != 1)
+    {
+        return -1;
+    }
+#else
     mlk_tempo_gen_matrix(&a2, seed, 0);
+#endif
     mlk_polymat_permute_bitrev_to_custom(&a2);
     for (int i = 0; i < MLKEM_K; i++)
     {
