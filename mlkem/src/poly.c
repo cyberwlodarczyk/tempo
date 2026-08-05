@@ -280,6 +280,7 @@ void mlk_poly_sub(mlk_poly *r, const mlk_poly *b)
 #endif
 }
 
+#if defined(MLK_CONFIG_TEMPO_FLS185) || defined(MLK_CONFIG_PERF)
 MLK_INTERNAL_API
 void mlk_poly_sub_mask(mlk_poly *r, const mlk_poly *a, const mlk_poly *b, int mask)
 {
@@ -304,6 +305,7 @@ void mlk_poly_sub_mask(mlk_poly *r, const mlk_poly *a, const mlk_poly *b, int ma
   }
 #endif
 }
+#endif
 
 #include "zetas.inc"
 

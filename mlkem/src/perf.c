@@ -19,7 +19,7 @@ static uint64_t time_ns()
 
 #ifdef MLK_CONFIG_MULTILEVEL_WITH_SHARED
 MLK_EXTERNAL_API
-uint64_t mlk_perf_randombytes_32()
+uint64_t mlk_perf_randombytes_32(void)
 {
     uint8_t seed[32];
     uint64_t start = time_ns();
@@ -32,7 +32,7 @@ uint64_t mlk_perf_randombytes_32()
 #endif
 
 MLK_EXTERNAL_API
-uint64_t mlk_perf_polyvec_sub()
+uint64_t mlk_perf_polyvec_sub(void)
 {
     uint8_t seed1[MLKEM_SYMBYTES];
     RAND_bytes(seed1, MLKEM_SYMBYTES);
@@ -48,7 +48,7 @@ uint64_t mlk_perf_polyvec_sub()
 }
 
 MLK_EXTERNAL_API
-uint64_t mlk_perf_polyvec_sub_mask()
+uint64_t mlk_perf_polyvec_sub_mask(void)
 {
     uint8_t seed1[MLKEM_SYMBYTES];
     RAND_bytes(seed1, MLKEM_SYMBYTES);
@@ -68,7 +68,7 @@ uint64_t mlk_perf_polyvec_sub_mask()
 }
 
 MLK_EXTERNAL_API
-uint64_t mlk_perf_gen_vector()
+uint64_t mlk_perf_gen_vector(void)
 {
     uint8_t seed[MLKEM_SYMBYTES];
     RAND_bytes(seed, MLKEM_SYMBYTES);
@@ -79,7 +79,7 @@ uint64_t mlk_perf_gen_vector()
 }
 
 MLK_EXTERNAL_API
-uint64_t mlk_perf_gen_matrix()
+uint64_t mlk_perf_gen_matrix(void)
 {
     uint8_t seed[MLKEM_SYMBYTES];
     RAND_bytes(seed, MLKEM_SYMBYTES);
@@ -90,7 +90,7 @@ uint64_t mlk_perf_gen_matrix()
 }
 
 MLK_EXTERNAL_API
-uint64_t mlk_perf_keypair()
+uint64_t mlk_perf_keypair(void)
 {
     uint8_t pk[MLKEM_INDCCA_LEN_PUBLIC_KEY];
     uint8_t sk[MLKEM_INDCCA_LEN_SECRET_KEY];
@@ -103,7 +103,7 @@ uint64_t mlk_perf_keypair()
 }
 
 MLK_EXTERNAL_API
-uint64_t mlk_perf_enc()
+uint64_t mlk_perf_enc(void)
 {
     uint8_t pk[MLKEM_INDCCA_LEN_PUBLIC_KEY];
     uint8_t sk[MLKEM_INDCCA_LEN_SECRET_KEY];
@@ -122,7 +122,7 @@ uint64_t mlk_perf_enc()
 }
 
 MLK_EXTERNAL_API
-uint64_t mlk_perf_dec()
+uint64_t mlk_perf_dec(void)
 {
     uint8_t pk[MLKEM_INDCCA_LEN_PUBLIC_KEY];
     uint8_t sk[MLKEM_INDCCA_LEN_SECRET_KEY];
@@ -146,7 +146,7 @@ uint64_t mlk_perf_dec()
 }
 
 MLK_EXTERNAL_API
-uint64_t mlk_perf_tempo_gen_vector()
+uint64_t mlk_perf_tempo_gen_vector(void)
 {
     uint8_t seed[MLKEM_SYMBYTES];
     RAND_bytes(seed, MLKEM_SYMBYTES);
@@ -157,7 +157,7 @@ uint64_t mlk_perf_tempo_gen_vector()
 }
 
 MLK_EXTERNAL_API
-uint64_t mlk_perf_tempo_gen_matrix()
+uint64_t mlk_perf_tempo_gen_matrix(void)
 {
     uint8_t seed[MLKEM_SYMBYTES];
     RAND_bytes(seed, MLKEM_SYMBYTES);
@@ -168,7 +168,7 @@ uint64_t mlk_perf_tempo_gen_matrix()
 }
 
 MLK_EXTERNAL_API
-uint64_t mlk_perf_tempo_keygen()
+uint64_t mlk_perf_tempo_keygen(void)
 {
     uint8_t pk[MLKEM_INDCCA_LEN_PUBLIC_KEY];
     uint8_t apk[TEMPO_LEN_APK];
@@ -186,7 +186,7 @@ uint64_t mlk_perf_tempo_keygen()
 }
 
 MLK_EXTERNAL_API
-uint64_t mlk_perf_tempo_encaps()
+uint64_t mlk_perf_tempo_encaps(void)
 {
     uint8_t pk1[MLKEM_INDCCA_LEN_PUBLIC_KEY];
     uint8_t apk[TEMPO_LEN_APK];
@@ -211,7 +211,7 @@ uint64_t mlk_perf_tempo_encaps()
 }
 
 MLK_EXTERNAL_API
-uint64_t mlk_perf_tempo_decaps()
+uint64_t mlk_perf_tempo_decaps(void)
 {
     uint8_t pk1[MLKEM_INDCCA_LEN_PUBLIC_KEY];
     uint8_t apk[TEMPO_LEN_APK];

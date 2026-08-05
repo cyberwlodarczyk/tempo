@@ -210,6 +210,7 @@ static inline void h_confirm(
     mlk_zeroize(output, outlen);
 }
 
+#if defined(MLK_CONFIG_TEST) || defined(MLK_CONFIG_PERF)
 MLK_INTERNAL_API
 FLS_RETURN mlk_tempo_gen_vector(
     mlk_polyvec *v,
@@ -235,6 +236,7 @@ FLS_RETURN mlk_tempo_gen_matrix(
     h_fls(a->vec, seed, transposed, MLKEM_K);
 #endif
 }
+#endif
 
 MLK_EXTERNAL_API
 int mlk_tempo_keygen(

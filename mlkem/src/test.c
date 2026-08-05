@@ -6,7 +6,7 @@
 #include "tempo.h"
 
 MLK_EXTERNAL_API
-int mlk_test_exchange()
+int mlk_test_exchange(void)
 {
     uint8_t pk[MLKEM_INDCCA_LEN_PUBLIC_KEY];
     uint8_t sk[MLKEM_INDCCA_LEN_SECRET_KEY];
@@ -64,7 +64,7 @@ static int test_tempo_exchange(uint8_t *pwd1, uint8_t *pwd2)
 }
 
 MLK_EXTERNAL_API
-int mlk_test_tempo_exchange_correct()
+int mlk_test_tempo_exchange_correct(void)
 {
     uint8_t pwd[TEMPO_LEN_PWD];
     RAND_bytes(pwd, TEMPO_LEN_PWD);
@@ -72,7 +72,7 @@ int mlk_test_tempo_exchange_correct()
 }
 
 MLK_EXTERNAL_API
-int mlk_test_tempo_exchange_incorrect()
+int mlk_test_tempo_exchange_incorrect(void)
 {
     uint8_t pwd1[TEMPO_LEN_PWD];
     RAND_bytes(pwd1, TEMPO_LEN_PWD);
@@ -82,7 +82,7 @@ int mlk_test_tempo_exchange_incorrect()
 }
 
 MLK_EXTERNAL_API
-int mlk_test_tempo_gen_vector()
+int mlk_test_tempo_gen_vector(void)
 {
     uint8_t seed[MLKEM_SYMBYTES];
     RAND_bytes(seed, MLKEM_SYMBYTES);
@@ -105,7 +105,7 @@ int mlk_test_tempo_gen_vector()
 }
 
 MLK_EXTERNAL_API
-int mlk_test_tempo_gen_matrix()
+int mlk_test_tempo_gen_matrix(void)
 {
     uint8_t seed[MLKEM_SYMBYTES];
     RAND_bytes(seed, MLKEM_SYMBYTES);

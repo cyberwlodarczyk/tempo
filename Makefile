@@ -1,7 +1,7 @@
 # Copyright (c) The mlkem-native project authors
 # SPDX-License-Identifier: Apache-2.0 OR ISC OR MIT
 
-.PHONY: all build exchange perf clean
+.PHONY: all build test perf clean
 .DEFAULT_GOAL := all
 
 CC  ?= gcc
@@ -14,8 +14,7 @@ CFLAGS := \
 	-Werror=unused-result \
 	-Wpedantic \
 	-Werror \
-	-Wno-missing-prototypes \
-	-Wno-unused-function \
+	-Wmissing-prototypes \
 	-Wshadow \
 	-Wpointer-arith \
 	-Wredundant-decls \
@@ -25,12 +24,9 @@ CFLAGS := \
 	-Wno-unknown-pragmas \
 	-Wno-unused-command-line-argument \
 	-O3 \
-	-fomit-frame-pointer \
 	-std=c99 \
 	-pedantic \
 	-MMD \
-	-mavx512f \
-	-mavx512bw \
 	$(CFLAGS)
 
 # If you want to use the native backends, the compiler needs to know about
@@ -82,7 +78,6 @@ BUILD_DIR=build
 BIN_DIR=bin
 BIN_TEST=$(BIN_DIR)/test
 BIN_PERF=$(BIN_DIR)/perf
-BIN_PERF_GEN_MATRIX=$(BIN_DIR)/perf_gen_matrix
 
 #
 # Configuration adjustments
@@ -112,16 +107,13 @@ $(BIN_DIR)/%: %.c $(MLK_OBJ_C) $(MLK_OBJ_ASM)
 
 all: build
 
-build: $(BIN_TEST) $(BIN_PERF) $(BIN_PERF_GEN_MATRIX)
+build: $(BIN_TEST) $(BIN_PERF)
 
 test: $(BIN_TEST)
 	./$(BIN_TEST)
 
 perf: $(BIN_PERF)
 	./$(BIN_PERF)
-
-perf_gen_matrix: $(BIN_PERF_GEN_MATRIX)
-	./$(BIN_PERF_GEN_MATRIX) | python3 perf_gen_matrix.py
 
 clean:
 	rm -rf $(BUILD_DIR)

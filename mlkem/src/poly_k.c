@@ -275,6 +275,7 @@ void mlk_polyvec_add(mlk_polyvec *r, const mlk_polyvec *b)
     }
 }
 
+#if !defined(MLK_CONFIG_TEMPO_FLS185) || defined(MLK_CONFIG_PERF)
 MLK_INTERNAL_API
 void mlk_polyvec_sub(mlk_polyvec *r, const mlk_polyvec *b)
 {
@@ -296,7 +297,9 @@ void mlk_polyvec_sub(mlk_polyvec *r, const mlk_polyvec *b)
       mlk_poly_sub(&r->vec[i], &b->vec[i]);
     }
 }
+#endif
 
+#if defined(MLK_CONFIG_TEMPO_FLS185) || defined(MLK_CONFIG_PERF)
 MLK_INTERNAL_API
 void mlk_polyvec_sub_mask(
     mlk_polyvec *r,
@@ -309,6 +312,7 @@ void mlk_polyvec_sub_mask(
     mlk_poly_sub_mask(&r->vec[i], &a->vec[i], &b->vec[i], mask);
   }
 }
+#endif
 
 /* Reference: `polyvec_tomont()` in the reference implementation @[REF]. */
 MLK_INTERNAL_API

@@ -30,17 +30,17 @@
 
 typedef struct
 {
-  mlk_poly vec[MLKEM_K];
+    mlk_poly vec[MLKEM_K];
 } MLK_ALIGN mlk_polyvec;
 
 typedef struct
 {
-  mlk_polyvec vec[MLKEM_K];
+    mlk_polyvec vec[MLKEM_K];
 } MLK_ALIGN mlk_polymat;
 
 typedef struct
 {
-  mlk_poly_mulcache vec[MLKEM_K];
+    mlk_poly_mulcache vec[MLKEM_K];
 } MLK_ALIGN mlk_polyvec_mulcache;
 
 #define mlk_poly_compress_du MLK_NAMESPACE_K(poly_compress_du)
@@ -69,9 +69,9 @@ static MLK_INLINE void mlk_poly_compress_du(
             assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_DU)))
 {
 #if MLKEM_DU == 10
-  mlk_poly_compress_d10(r, a);
+    mlk_poly_compress_d10(r, a);
 #elif MLKEM_DU == 11
-  mlk_poly_compress_d11(r, a);
+    mlk_poly_compress_d11(r, a);
 #else
 #error "Invalid value of MLKEM_DU"
 #endif
@@ -105,9 +105,9 @@ static MLK_INLINE void mlk_poly_decompress_du(
                 ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
 {
 #if MLKEM_DU == 10
-  mlk_poly_decompress_d10(r, a);
+    mlk_poly_decompress_d10(r, a);
 #elif MLKEM_DU == 11
-  mlk_poly_decompress_d11(r, a);
+    mlk_poly_decompress_d11(r, a);
 #else
 #error "Invalid value of MLKEM_DU"
 #endif
@@ -139,9 +139,9 @@ static MLK_INLINE void mlk_poly_compress_dv(
             assigns(memory_slice(r, MLKEM_POLYCOMPRESSEDBYTES_DV)))
 {
 #if MLKEM_DV == 4
-  mlk_poly_compress_d4(r, a);
+    mlk_poly_compress_d4(r, a);
 #elif MLKEM_DV == 5
-  mlk_poly_compress_d5(r, a);
+    mlk_poly_compress_d5(r, a);
 #else
 #error "Invalid value of MLKEM_DV"
 #endif
@@ -175,9 +175,9 @@ static MLK_INLINE void mlk_poly_decompress_dv(
                 ensures(array_bound(r->coeffs, 0, MLKEM_N, 0, MLKEM_Q)))
 {
 #if MLKEM_DV == 4
-  mlk_poly_decompress_d4(r, a);
+    mlk_poly_decompress_d4(r, a);
 #elif MLKEM_DV == 5
-  mlk_poly_decompress_d5(r, a);
+    mlk_poly_decompress_d5(r, a);
 #else
 #error "Invalid value of MLKEM_DV"
 #endif
@@ -343,7 +343,7 @@ void mlk_polyvec_invntt_tomont(mlk_polyvec *r)
                                array_abs_bound(r->vec[j].coeffs, 0, MLKEM_N, MLK_INVNTT_BOUND))));
 
 #define mlk_polyvec_basemul_acc_montgomery_cached \
-  MLK_NAMESPACE_K(polyvec_basemul_acc_montgomery_cached)
+    MLK_NAMESPACE_K(polyvec_basemul_acc_montgomery_cached)
 /*************************************************
  * Name:        mlk_polyvec_basemul_acc_montgomery_cached
  *
@@ -476,6 +476,7 @@ void mlk_polyvec_add(mlk_polyvec *r, const mlk_polyvec *b)
                                                                                                                                                                                                                                  (int32_t)r->vec[j1].coeffs[k1] + b->vec[j1].coeffs[k1] >= INT16_MIN)))
             assigns(memory_slice(r, sizeof(mlk_polyvec))));
 
+#if !defined(MLK_CONFIG_TEMPO_FLS185) || defined(MLK_CONFIG_PERF)
 #define mlk_polyvec_sub MLK_NAMESPACE_K(polyvec_sub)
 MLK_INTERNAL_API
 void mlk_polyvec_sub(mlk_polyvec *r, const mlk_polyvec *b)
@@ -486,7 +487,9 @@ void mlk_polyvec_sub(mlk_polyvec *r, const mlk_polyvec *b)
                                                                                                                                                                                                                           forall(k1, 0, MLKEM_N,
                                                                                                                                                                                                                                  (int32_t)r->vec[j1].coeffs[k1] + b->vec[j1].coeffs[k1] >= INT16_MIN)))
             assigns(memory_slice(r, sizeof(mlk_polyvec))));
+#endif
 
+#if defined(MLK_CONFIG_TEMPO_FLS185) || defined(MLK_CONFIG_PERF)
 #define mlk_polyvec_sub_mask MLK_NAMESPACE_K(polyvec_sub_mask)
 MLK_INTERNAL_API
 void mlk_polyvec_sub_mask(
@@ -494,6 +497,7 @@ void mlk_polyvec_sub_mask(
     const mlk_polyvec *a,
     const mlk_polyvec *b,
     int mask);
+#endif
 
 #define mlk_polyvec_tomont MLK_NAMESPACE_K(polyvec_tomont)
 /*************************************************

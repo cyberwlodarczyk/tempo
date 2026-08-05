@@ -32,7 +32,7 @@
  */
 typedef struct
 {
-  int16_t coeffs[MLKEM_N];
+    int16_t coeffs[MLKEM_N];
 } MLK_ALIGN mlk_poly;
 
 /*
@@ -41,7 +41,7 @@ typedef struct
  */
 typedef struct
 {
-  int16_t coeffs[MLKEM_N >> 1];
+    int16_t coeffs[MLKEM_N >> 1];
 } MLK_ALIGN mlk_poly_mulcache;
 
 /*************************************************
@@ -70,36 +70,36 @@ static MLK_ALWAYS_INLINE int16_t mlk_montgomery_reduce(int32_t a)
          *          for mlk_fqmul which does have a post-condition bound. */
     )
 {
-  /* check-magic: 62209 == unsigned_mod(pow(MLKEM_Q, -1, 2^16), 2^16) */
-  const uint32_t QINV = 62209;
+    /* check-magic: 62209 == unsigned_mod(pow(MLKEM_Q, -1, 2^16), 2^16) */
+    const uint32_t QINV = 62209;
 
-  /* Compute a*q^{-1} mod 2^16 in unsigned representatives. */
-  const uint16_t a_reduced = mlk_cast_int32_to_uint16(a);
-  const uint16_t a_inverted = (a_reduced * QINV) & UINT16_MAX;
+    /* Compute a*q^{-1} mod 2^16 in unsigned representatives. */
+    const uint16_t a_reduced = mlk_cast_int32_to_uint16(a);
+    const uint16_t a_inverted = (a_reduced * QINV) & UINT16_MAX;
 
-  /* Lift to signed canonical representative mod 2^16. */
-  const int16_t t = mlk_cast_uint16_to_int16(a_inverted);
+    /* Lift to signed canonical representative mod 2^16. */
+    const int16_t t = mlk_cast_uint16_to_int16(a_inverted);
 
-  int32_t r;
+    int32_t r;
 
-  mlk_assert(a < +(INT32_MAX - (((int32_t)1 << 15) * MLKEM_Q)) &&
-             a > -(INT32_MAX - (((int32_t)1 << 15) * MLKEM_Q)));
+    mlk_assert(a < +(INT32_MAX - (((int32_t)1 << 15) * MLKEM_Q)) &&
+               a > -(INT32_MAX - (((int32_t)1 << 15) * MLKEM_Q)));
 
-  r = a - ((int32_t)t * MLKEM_Q);
+    r = a - ((int32_t)t * MLKEM_Q);
 
-  /*
-   * PORTABILITY: Right-shift on a signed integer is, strictly-speaking,
-   * implementation-defined for negative left argument. Here,
-   * we assume it's sign-preserving "arithmetic" shift right. (C99 6.5.7 (5))
-   */
-  r = r >> 16;
-  /* Bounds: |r >> 16| <= ceil(|r| / 2^16)
-   *                   <= ceil(|a| / 2^16 + MLKEM_Q / 2)
-   *                   <= ceil(|a| / 2^16) + (MLKEM_Q + 1) / 2
-   *
-   * (Note that |a >> n| = ceil(|a| / 2^16) for negative a)
-   */
-  return (int16_t)r;
+    /*
+     * PORTABILITY: Right-shift on a signed integer is, strictly-speaking,
+     * implementation-defined for negative left argument. Here,
+     * we assume it's sign-preserving "arithmetic" shift right. (C99 6.5.7 (5))
+     */
+    r = r >> 16;
+    /* Bounds: |r >> 16| <= ceil(|r| / 2^16)
+     *                   <= ceil(|a| / 2^16 + MLKEM_Q / 2)
+     *                   <= ceil(|a| / 2^16) + (MLKEM_Q + 1) / 2
+     *
+     * (Note that |a >> n| = ceil(|a| / 2^16) for negative a)
+     */
+    return (int16_t)r;
 }
 
 #define mlk_poly_tomont MLK_NAMESPACE(poly_tomont)
@@ -242,6 +242,7 @@ void mlk_poly_sub(mlk_poly *r, const mlk_poly *b)
             ensures(forall(k, 0, MLKEM_N, r->coeffs[k] == old(*r).coeffs[k] - b->coeffs[k]))
                 assigns(memory_slice(r, sizeof(mlk_poly))));
 
+#if defined(MLK_CONFIG_TEMPO_FLS185) || defined(MLK_CONFIG_PERF)
 #define mlk_poly_sub_mask MLK_NAMESPACE(poly_sub_mask)
 MLK_INTERNAL_API
 void mlk_poly_sub_mask(
@@ -249,6 +250,7 @@ void mlk_poly_sub_mask(
     const mlk_poly *a,
     const mlk_poly *b,
     int mask);
+#endif
 
 #define mlk_poly_ntt MLK_NAMESPACE(poly_ntt)
 /*************************************************

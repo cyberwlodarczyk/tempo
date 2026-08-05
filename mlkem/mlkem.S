@@ -340,12 +340,12 @@
 #undef mlk_polyvec_tomont
 /* mlkem/src/tempo.h */
 #undef MLK_TEMPO_H
-#undef mlk_tempo_session
+#undef MLK_TEMPO_FLS_RETURN
+#undef mlk_tempo_gen_vector
+#undef mlk_tempo_gen_matrix
 #undef mlk_tempo_keygen
 #undef mlk_tempo_encaps
 #undef mlk_tempo_decaps
-#undef mlk_tempo_confirm
-#undef mlk_tempo_verify
 
 #if !defined(MLK_CONFIG_MONOBUILD_KEEP_SHARED_HEADERS)
 /*

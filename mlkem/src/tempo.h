@@ -4,6 +4,7 @@
 #include "common.h"
 #include "poly_k.h"
 
+#if defined(MLK_CONFIG_TEST) || defined(MLK_CONFIG_PERF)
 #ifdef MLK_CONFIG_TEMPO_FLS185
 #define MLK_TEMPO_FLS_RETURN int
 #else
@@ -23,6 +24,7 @@ MLK_TEMPO_FLS_RETURN mlk_tempo_gen_matrix(
     mlk_polymat *a,
     uint8_t seed[MLKEM_SYMBYTES],
     int transposed);
+#endif
 
 #define mlk_tempo_keygen MLK_TEMPO_NAMESPACE_K(keygen)
 MLK_EXTERNAL_API
