@@ -336,12 +336,12 @@ static int h_2(
 #define h_confirm MLK_ADD_PARAM_SET(h_confirm)
 static inline int h_confirm(
     uint8_t *tag,
-    uint8_t *shared_secret,
+    uint8_t *ss,
     const uint8_t *sid,
     const uint8_t *pwd,
-    const uint8_t *public_key,
+    const uint8_t *pk,
     const uint8_t *apk,
-    const uint8_t *ciphertext,
+    const uint8_t *ct,
     const uint8_t *key)
 {
     int ret = 0;
@@ -361,9 +361,9 @@ static inline int h_confirm(
     size_t i = 0;
     memcpy(input, sid, TEMPO_LEN_SID);
     memcpy(input + (i += TEMPO_LEN_SID), pwd, TEMPO_LEN_PWD);
-    memcpy(input + (i += TEMPO_LEN_PWD), public_key, MLKEM_INDCCA_LEN_PUBLIC_KEY);
+    memcpy(input + (i += TEMPO_LEN_PWD), pk, MLKEM_INDCCA_LEN_PUBLIC_KEY);
     memcpy(input + (i += MLKEM_INDCCA_LEN_PUBLIC_KEY), apk, TEMPO_LEN_APK);
-    memcpy(input + (i += TEMPO_LEN_APK), ciphertext, MLKEM_INDCCA_LEN_CIPHERTEXT);
+    memcpy(input + (i += TEMPO_LEN_APK), ct, MLKEM_INDCCA_LEN_CIPHERTEXT);
     memcpy(input + (i += MLKEM_INDCCA_LEN_CIPHERTEXT), key, MLKEM_SSBYTES);
 #ifdef MLK_CONFIG_USE_OPENSSL
     if (sha512(tmp, input, inlen) != 0 ||
@@ -376,7 +376,7 @@ static inline int h_confirm(
     mlk_shake256(output, outlen, input, inlen);
 #endif
     memcpy(tag, output, TEMPO_LEN_TAG);
-    memcpy(shared_secret, output + TEMPO_LEN_TAG, TEMPO_LEN_SHARED_SECRET);
+    memcpy(ss, output + TEMPO_LEN_TAG, TEMPO_LEN_SHARED_SECRET);
 cleanup:
     mlk_zeroize(input, inlen);
     mlk_zeroize(output, outlen);
