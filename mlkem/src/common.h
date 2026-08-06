@@ -184,6 +184,8 @@
  * system misconfiguration. */
 #define MLK_ERR_RNG_FAIL -3
 
+#define MLK_ERR_DIGEST_FAIL -4
+
 #endif /* !__ASSEMBLER__ */
 
 #endif /* !MLK_COMMON_H */

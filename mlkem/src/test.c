@@ -1,9 +1,9 @@
 #include <string.h>
-#include <openssl/rand.h>
 #include "test.h"
 #include "indcpa.h"
 #include "kem.h"
 #include "tempo.h"
+#include "randombytes.h"
 
 MLK_EXTERNAL_API
 int mlk_test_exchange(void)
@@ -36,7 +36,10 @@ int mlk_test_exchange(void)
 static int test_tempo_exchange(uint8_t *pwd1, uint8_t *pwd2)
 {
     uint8_t sid[TEMPO_LEN_SID];
-    RAND_bytes(sid, TEMPO_LEN_SID);
+    if (mlk_randombytes(sid, TEMPO_LEN_SID) != 0)
+    {
+        return -1;
+    }
     uint8_t pk1[MLKEM_INDCCA_LEN_PUBLIC_KEY];
     uint8_t sk[MLKEM_INDCCA_LEN_SECRET_KEY];
     uint8_t apk[TEMPO_LEN_APK];
@@ -67,7 +70,10 @@ MLK_EXTERNAL_API
 int mlk_test_tempo_exchange_correct(void)
 {
     uint8_t pwd[TEMPO_LEN_PWD];
-    RAND_bytes(pwd, TEMPO_LEN_PWD);
+    if (mlk_randombytes(pwd, TEMPO_LEN_PWD) != 0)
+    {
+        return -1;
+    }
     return test_tempo_exchange(pwd, pwd);
 }
 
@@ -75,9 +81,15 @@ MLK_EXTERNAL_API
 int mlk_test_tempo_exchange_incorrect(void)
 {
     uint8_t pwd1[TEMPO_LEN_PWD];
-    RAND_bytes(pwd1, TEMPO_LEN_PWD);
+    if (mlk_randombytes(pwd1, TEMPO_LEN_PWD) != 0)
+    {
+        return -1;
+    }
     uint8_t pwd2[TEMPO_LEN_PWD];
-    RAND_bytes(pwd2, TEMPO_LEN_PWD);
+    if (mlk_randombytes(pwd2, TEMPO_LEN_PWD) != 0)
+    {
+        return -1;
+    }
     return test_tempo_exchange(pwd1, pwd2) == 0 ? -1 : 0;
 }
 
@@ -85,18 +97,17 @@ MLK_EXTERNAL_API
 int mlk_test_tempo_gen_vector(void)
 {
     uint8_t seed[MLKEM_SYMBYTES];
-    RAND_bytes(seed, MLKEM_SYMBYTES);
+    if (mlk_randombytes(seed, MLKEM_SYMBYTES) != 0)
+    {
+        return -1;
+    }
     mlk_polyvec v1;
     mlk_gen_vector(&v1, seed, 0);
     mlk_polyvec v2;
-#ifdef MLK_CONFIG_TEMPO_FLS185
     if (mlk_tempo_gen_vector(&v2, seed, 0) != 1)
     {
         return -1;
     }
-#else
-    mlk_tempo_gen_vector(&v2, seed, 0);
-#endif
     mlk_polyvec_permute_bitrev_to_custom(&v2);
     for (int j = 0; j < MLKEM_K; j++)
     {
@@ -115,18 +126,17 @@ MLK_EXTERNAL_API
 int mlk_test_tempo_gen_matrix(void)
 {
     uint8_t seed[MLKEM_SYMBYTES];
-    RAND_bytes(seed, MLKEM_SYMBYTES);
+    if (mlk_randombytes(seed, MLKEM_SYMBYTES) != 0)
+    {
+        return -1;
+    }
     mlk_polymat a1;
     mlk_gen_matrix(&a1, seed, 0);
     mlk_polymat a2;
-#ifdef MLK_CONFIG_TEMPO_FLS185
     if (mlk_tempo_gen_matrix(&a2, seed, 0) != 1)
     {
         return -1;
     }
-#else
-    mlk_tempo_gen_matrix(&a2, seed, 0);
-#endif
     mlk_polymat_permute_bitrev_to_custom(&a2);
     for (int i = 0; i < MLKEM_K; i++)
     {

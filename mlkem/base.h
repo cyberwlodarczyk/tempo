@@ -152,6 +152,8 @@
  * system misconfiguration. */
 #define MLK_ERR_RNG_FAIL -3
 
+#define MLK_ERR_DIGEST_FAIL -4
+
 /****************************** Function API **********************************/
 
 #define MLK_API_CONCAT_(x, y) x##y

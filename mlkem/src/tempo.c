@@ -2,20 +2,143 @@
 #if defined(MLK_SYS_X86_64_AVX2) || defined(MLK_SYS_X86_64_AVX512)
 #include <immintrin.h>
 #endif
+#ifdef MLK_CONFIG_USE_OPENSSL
+#include <openssl/evp.h>
+#endif
 #include "tempo.h"
 #include "symmetric.h"
 #include "poly_k.h"
 #include "indcpa.h"
 #include "kem.h"
 
+#ifdef MLK_CONFIG_USE_OPENSSL
+#define md_ctx MLK_ADD_PARAM_SET(md_ctx)
+static EVP_MD_CTX *md_ctx = NULL;
+#define md_shake128 MLK_ADD_PARAM_SET(md_shake128)
+static const EVP_MD *md_shake128 = NULL;
+#define md_shake256 MLK_ADD_PARAM_SET(md_shake256)
+static const EVP_MD *md_shake256 = NULL;
+#define md_sha256 MLK_ADD_PARAM_SET(md_sha256)
+static const EVP_MD *md_sha256 = NULL;
+#define md_sha512 MLK_ADD_PARAM_SET(md_sha512)
+static const EVP_MD *md_sha512 = NULL;
+
+#define md_init MLK_ADD_PARAM_SET(md_init)
+static int md_init(void)
+{
+    md_ctx = EVP_MD_CTX_new();
+    if (md_ctx == NULL)
+    {
+        return -1;
+    }
+    md_shake128 = EVP_MD_fetch(NULL, "SHAKE128", NULL);
+    if (md_shake128 == NULL)
+    {
+        md_ctx = NULL;
+        return -1;
+    }
+    md_shake256 = EVP_MD_fetch(NULL, "SHAKE256", NULL);
+    if (md_shake256 == NULL)
+    {
+        md_ctx = NULL;
+        md_shake128 = NULL;
+        return -1;
+    }
+    md_sha256 = EVP_MD_fetch(NULL, "SHA256", NULL);
+    if (md_sha256 == NULL)
+    {
+        md_ctx = NULL;
+        md_shake128 = NULL;
+        md_shake256 = NULL;
+        return -1;
+    }
+    md_sha512 = EVP_MD_fetch(NULL, "SHA512", NULL);
+    if (md_sha512 == NULL)
+    {
+        md_ctx = NULL;
+        md_shake128 = NULL;
+        md_shake256 = NULL;
+        md_sha256 = NULL;
+        return -1;
+    }
+    return 0;
+}
+
+#define digest MLK_ADD_PARAM_SET(digest)
+static inline int digest(
+    const EVP_MD *md,
+    uint8_t *out,
+    size_t outlen,
+    const uint8_t *in,
+    size_t inlen)
+{
+    int ret = 0;
+    if (!EVP_DigestInit(md_ctx, md) ||
+        !EVP_DigestUpdate(md_ctx, in, inlen) ||
+        !(outlen != 0
+              ? EVP_DigestFinalXOF(md_ctx, out, outlen)
+              : EVP_DigestFinal_ex(md_ctx, out, NULL)))
+    {
+        ret = -1;
+    }
+    return ret;
+}
+
+#define shake128 MLK_ADD_PARAM_SET(shake128)
+static int shake128(
+    uint8_t *out,
+    size_t outlen,
+    const uint8_t *in,
+    size_t inlen)
+{
+    if (md_ctx == NULL && md_init() != 0)
+    {
+        return -1;
+    }
+    return digest(md_shake128, out, outlen, in, inlen);
+}
+
+#define shake256 MLK_ADD_PARAM_SET(shake256)
+static int shake256(
+    uint8_t *out,
+    size_t outlen,
+    const uint8_t *in,
+    size_t inlen)
+{
+    if (md_ctx == NULL && md_init() != 0)
+    {
+        return -1;
+    }
+    return digest(md_shake256, out, outlen, in, inlen);
+}
+
+#define sha256 MLK_ADD_PARAM_SET(sha256)
+static int sha256(uint8_t *out, const uint8_t *in, size_t inlen)
+{
+    if (md_ctx == NULL && md_init() != 0)
+    {
+        return -1;
+    }
+    return digest(md_sha256, out, 0, in, inlen);
+}
+
+#define sha512 MLK_ADD_PARAM_SET(sha512)
+static int sha512(uint8_t *out, const uint8_t *in, size_t inlen)
+{
+    if (md_ctx == NULL && md_init() != 0)
+    {
+        return -1;
+    }
+    return digest(md_sha512, out, 0, in, inlen);
+}
+#endif
+
 #ifdef MLK_CONFIG_TEMPO_FLS185
 #define FLS_ITER 185
 #define FLS_XOF_BLOCKS 4
-#define FLS_RETURN int
 #else
 #define FLS_ITER 280
 #define FLS_XOF_BLOCKS 5
-#define FLS_RETURN void
 #endif
 
 // https://github.com/afonsoarriaga/ProjectTempo
@@ -27,7 +150,7 @@
 #define eq_1mask_32(x, y) (uint32_t)(~diff_1mask_32(x, y))
 
 #define h_fls MLK_ADD_PARAM_SET(h_fls)
-static FLS_RETURN h_fls(
+static int h_fls(
     mlk_polyvec *v,
     const uint8_t *seed,
     int transposed,
@@ -36,18 +159,28 @@ static FLS_RETURN h_fls(
     uint8_t buf[FLS_XOF_BLOCKS * SHAKE128_RATE];
     uint8_t ext_seed[MLKEM_SYMBYTES + 2];
     memcpy(ext_seed, seed, MLKEM_SYMBYTES);
-#ifdef MLK_CONFIG_TEMPO_FLS185
     int ret = 1;
-#endif
     for (uint8_t y = 0; y < n; y++)
     {
         ext_seed[MLKEM_SYMBYTES + !transposed] = y;
         for (uint8_t x = 0; x < MLKEM_K; x++)
         {
             ext_seed[MLKEM_SYMBYTES + transposed] = x;
+#ifdef MLK_CONFIG_USE_OPENSSL
+            if (shake128(
+                    buf,
+                    FLS_XOF_BLOCKS * SHAKE128_RATE,
+                    ext_seed,
+                    sizeof(ext_seed)) != 0)
+            {
+                ret = MLK_ERR_DIGEST_FAIL;
+                goto cleanup;
+            }
+#else
             mlk_xof_ctx ctx;
             mlk_xof_absorb(&ctx, ext_seed, sizeof(ext_seed));
             mlk_xof_squeezeblocks(buf, FLS_XOF_BLOCKS, &ctx);
+#endif
             uint16_t ctr = 0;
             for (int i = 0, j = 0; i < FLS_ITER; i++, j += 3)
             {
@@ -113,24 +246,26 @@ static FLS_RETURN h_fls(
 #ifdef MLK_CONFIG_TEMPO_FLS185
             ret &= (ctr >> 8);
 #endif
+#ifndef MLK_CONFIG_USE_OPENSSL
             mlk_xof_release(&ctx);
+#endif
         }
     }
+cleanup:
     mlk_zeroize(buf, sizeof(buf));
     mlk_zeroize(ext_seed, sizeof(ext_seed));
-#ifdef MLK_CONFIG_TEMPO_FLS185
     return ret;
-#endif
 }
 
 #define h_1 MLK_ADD_PARAM_SET(h_1)
-static FLS_RETURN h_1(
+static int h_1(
     mlk_polyvec *r,
     const uint8_t *sid,
     const uint8_t *pwd,
     const uint8_t *seed,
     const uint8_t *r_seed)
 {
+    int ret = 0;
     const size_t inlen = TEMPO_LEN_SID +
                          TEMPO_LEN_PWD +
                          MLKEM_SYMBYTES +
@@ -143,43 +278,63 @@ static FLS_RETURN h_1(
     memcpy(input + (i += TEMPO_LEN_SID), pwd, TEMPO_LEN_PWD);
     memcpy(input + (i += TEMPO_LEN_PWD), seed, MLKEM_SYMBYTES);
     memcpy(input + (i += MLKEM_SYMBYTES), r_seed, TEMPO_3LAMBDA);
-    mlk_shake256(output, outlen, input, inlen);
-#ifdef MLK_CONFIG_TEMPO_FLS185
-    int ret = h_fls(r, output, 0, 1);
+#ifdef MLK_CONFIG_USE_OPENSSL
+    if (sha256(output, input, inlen) != 0)
+    {
+        ret = MLK_ERR_DIGEST_FAIL;
+        goto cleanup;
+    }
 #else
-    h_fls(r, output, 0, 1);
+    mlk_shake256(output, outlen, input, inlen);
 #endif
+    ret = h_fls(r, output, 0, 1);
+cleanup:
     mlk_zeroize(input, inlen);
     mlk_zeroize(output, outlen);
-#ifdef MLK_CONFIG_TEMPO_FLS185
     return ret;
-#endif
 }
 
 #define h_2 MLK_ADD_PARAM_SET(h_2)
-static void h_2(
+static int h_2(
     uint8_t *v_hash,
     const uint8_t *sid,
     const uint8_t *pwd,
     const uint8_t *seed,
     const uint8_t *v_buf)
 {
+    int ret = 0;
     const size_t inlen = TEMPO_LEN_SID +
                          TEMPO_LEN_PWD +
                          MLKEM_SYMBYTES +
                          MLKEM_POLYVECBYTES;
     uint8_t input[inlen];
+#ifdef MLK_CONFIG_USE_OPENSSL
+    const size_t tmplen = 64;
+    uint8_t tmp[tmplen];
+#endif
     size_t i = 0;
     memcpy(input, sid, TEMPO_LEN_SID);
     memcpy(input + (i += TEMPO_LEN_SID), pwd, TEMPO_LEN_PWD);
     memcpy(input + (i += TEMPO_LEN_PWD), seed, MLKEM_SYMBYTES);
     memcpy(input + (i += MLKEM_SYMBYTES), v_buf, MLKEM_POLYVECBYTES);
+#ifdef MLK_CONFIG_USE_OPENSSL
+    if (sha512(tmp, input, inlen) ||
+        shake256(v_hash, TEMPO_3LAMBDA, tmp, tmplen) != 0)
+    {
+        ret = MLK_ERR_DIGEST_FAIL;
+    }
+#else
     mlk_shake256(v_hash, TEMPO_3LAMBDA, input, inlen);
+#endif
     mlk_zeroize(input, inlen);
+#ifdef MLK_CONFIG_USE_OPENSSL
+    mlk_zeroize(tmp, tmplen);
+#endif
+    return ret;
 }
 
 #define h_confirm MLK_ADD_PARAM_SET(h_confirm)
-static inline void h_confirm(
+static inline int h_confirm(
     uint8_t *tag,
     uint8_t *shared_secret,
     const uint8_t *sid,
@@ -189,6 +344,7 @@ static inline void h_confirm(
     const uint8_t *ciphertext,
     const uint8_t *key)
 {
+    int ret = 0;
     const size_t inlen = TEMPO_LEN_SID +
                          TEMPO_LEN_PWD +
                          MLKEM_INDCCA_LEN_PUBLIC_KEY +
@@ -198,6 +354,10 @@ static inline void h_confirm(
     const size_t outlen = TEMPO_LEN_TAG + TEMPO_LEN_SHARED_SECRET;
     uint8_t input[inlen];
     uint8_t output[outlen];
+#ifdef MLK_CONFIG_USE_OPENSSL
+    const size_t tmplen = 64;
+    uint8_t tmp[tmplen];
+#endif
     size_t i = 0;
     memcpy(input, sid, TEMPO_LEN_SID);
     memcpy(input + (i += TEMPO_LEN_SID), pwd, TEMPO_LEN_PWD);
@@ -205,38 +365,44 @@ static inline void h_confirm(
     memcpy(input + (i += MLKEM_INDCCA_LEN_PUBLIC_KEY), apk, TEMPO_LEN_APK);
     memcpy(input + (i += TEMPO_LEN_APK), ciphertext, MLKEM_INDCCA_LEN_CIPHERTEXT);
     memcpy(input + (i += MLKEM_INDCCA_LEN_CIPHERTEXT), key, MLKEM_SSBYTES);
+#ifdef MLK_CONFIG_USE_OPENSSL
+    if (sha512(tmp, input, inlen) != 0 ||
+        shake256(output, outlen, tmp, tmplen) != 0)
+    {
+        ret = MLK_ERR_DIGEST_FAIL;
+        goto cleanup;
+    }
+#else
     mlk_shake256(output, outlen, input, inlen);
+#endif
     memcpy(tag, output, TEMPO_LEN_TAG);
     memcpy(shared_secret, output + TEMPO_LEN_TAG, TEMPO_LEN_SHARED_SECRET);
+cleanup:
     mlk_zeroize(input, inlen);
     mlk_zeroize(output, outlen);
+#ifdef MLK_CONFIG_USE_OPENSSL
+    mlk_zeroize(tmp, tmplen);
+#endif
+    return ret;
 }
 
 #if defined(MLK_CONFIG_TEST) || defined(MLK_CONFIG_PERF)
 MLK_INTERNAL_API
-FLS_RETURN mlk_tempo_gen_vector(
+int mlk_tempo_gen_vector(
     mlk_polyvec *v,
     uint8_t seed[MLKEM_SYMBYTES],
     int transposed)
 {
-#ifdef MLK_CONFIG_TEMPO_FLS185
     return h_fls(v, seed, transposed, 1);
-#else
-    h_fls(v, seed, transposed, 1);
-#endif
 }
 
 MLK_INTERNAL_API
-FLS_RETURN mlk_tempo_gen_matrix(
+int mlk_tempo_gen_matrix(
     mlk_polymat *a,
     uint8_t seed[MLKEM_SYMBYTES],
     int transposed)
 {
-#ifdef MLK_CONFIG_TEMPO_FLS185
     return h_fls(a->vec, seed, transposed, MLKEM_K);
-#else
-    h_fls(a->vec, seed, transposed, MLKEM_K);
-#endif
 }
 #endif
 
@@ -264,11 +430,7 @@ int mlk_tempo_keygen(
     }
     memcpy(apk_seed, pk + MLKEM_POLYVECBYTES, MLKEM_SYMBYTES);
     memcpy(poly, pk, MLKEM_POLYVECBYTES);
-#ifdef MLK_CONFIG_TEMPO_FLS185
-    int fls_ret = 0;
-#else
-    int fls_ret = 1;
-#endif
+    int fls_ret;
     do
     {
         if (mlk_randombytes(r_seed, TEMPO_3LAMBDA) != 0)
@@ -276,17 +438,22 @@ int mlk_tempo_keygen(
             ret = MLK_ERR_RNG_FAIL;
             goto cleanup;
         }
-#ifdef MLK_CONFIG_TEMPO_FLS185
         fls_ret = h_1(&r, sid, pwd, apk_seed, r_seed);
-#else
-        h_1(&r, sid, pwd, apk_seed, r_seed);
-#endif
+        if (fls_ret < 0)
+        {
+            ret = fls_ret;
+            goto cleanup;
+        }
     } while (fls_ret != 1);
     mlk_polyvec_frombytes(&t, poly);
     mlk_polyvec_add(&t, &r);
     mlk_polyvec_reduce(&t);
     mlk_polyvec_tobytes(apk + TEMPO_3LAMBDA, &t);
-    h_2(v_hash, sid, pwd, apk_seed, apk_v);
+    ret = h_2(v_hash, sid, pwd, apk_seed, apk_v);
+    if (ret != 0)
+    {
+        goto cleanup;
+    }
     for (int i = 0; i < TEMPO_3LAMBDA; i++)
     {
         apk_u[i] = v_hash[i] ^ r_seed[i];
@@ -314,28 +481,37 @@ int mlk_tempo_encaps(
     const uint8_t *apk_v = apk_u + TEMPO_3LAMBDA;
     const uint8_t *apk_seed = apk_v + MLKEM_POLYVECBYTES;
     mlk_polyvec r;
-#ifdef MLK_CONFIG_TEMPO_FLS185
-    mlk_polyvec rx;
-#endif
     mlk_polyvec v;
     uint8_t r_seed[TEMPO_3LAMBDA];
     uint8_t v_hash[TEMPO_3LAMBDA];
     uint8_t pk[MLKEM_INDCCA_LEN_PUBLIC_KEY];
     uint8_t key[MLKEM_SSBYTES];
+#ifdef MLK_CONFIG_TEMPO_FLS185
+    mlk_polyvec rx;
+    uint8_t rx_seed[MLKEM_SYMBYTES];
+#endif
     ret = mlk_kem_check_pk(apk_v);
     if (ret != 0)
     {
         goto cleanup;
     }
-    h_2(v_hash, sid, pwd, apk_seed, apk_v);
+    ret = h_2(v_hash, sid, pwd, apk_seed, apk_v);
+    if (ret != 0)
+    {
+        goto cleanup;
+    }
     for (int i = 0; i < TEMPO_3LAMBDA; i++)
     {
         r_seed[i] = v_hash[i] ^ apk_u[i];
     }
     mlk_polyvec_frombytes(&v, apk_v);
-#ifdef MLK_CONFIG_TEMPO_FLS185
     int fls_ret = h_1(&r, sid, pwd, apk_seed, r_seed);
-    uint8_t rx_seed[MLKEM_SYMBYTES];
+    if (fls_ret < 0)
+    {
+        ret = fls_ret;
+        goto cleanup;
+    }
+#ifdef MLK_CONFIG_TEMPO_FLS185
     if (mlk_randombytes(rx_seed, MLKEM_SYMBYTES) != 0)
     {
         ret = MLK_ERR_RNG_FAIL;
@@ -344,7 +520,6 @@ int mlk_tempo_encaps(
     mlk_gen_vector(&rx, rx_seed, 0);
     mlk_polyvec_sub_mask(&v, &rx, &r, fls_ret);
 #else
-    h_1(&r, sid, pwd, apk_seed, r_seed);
     mlk_polyvec_sub(&v, &r);
 #endif
     mlk_polyvec_reduce(&v);
@@ -355,17 +530,18 @@ int mlk_tempo_encaps(
     {
         goto cleanup;
     }
-    h_confirm(tag, ss, sid, pwd, pk, apk, ct, key);
+    ret = h_confirm(tag, ss, sid, pwd, pk, apk, ct, key);
 cleanup:
     mlk_zeroize(&r, sizeof(r));
-#ifdef MLK_CONFIG_TEMPO_FLS185
-    mlk_zeroize(&rx, sizeof(rx));
-#endif
     mlk_zeroize(&v, sizeof(v));
     mlk_zeroize(r_seed, TEMPO_3LAMBDA);
     mlk_zeroize(v_hash, TEMPO_3LAMBDA);
     mlk_zeroize(pk, MLKEM_INDCCA_LEN_PUBLIC_KEY);
     mlk_zeroize(key, MLKEM_SSBYTES);
+#ifdef MLK_CONFIG_TEMPO_FLS185
+    mlk_zeroize(&rx, sizeof(rx));
+    mlk_zeroize(rx_seed, MLKEM_SYMBYTES);
+#endif
     return ret;
 }
 
@@ -383,30 +559,47 @@ int mlk_tempo_decaps(
     int ret = 0;
     uint8_t key[MLKEM_SSBYTES];
     uint8_t tag2[TEMPO_LEN_TAG];
-    uint8_t ss1[TEMPO_LEN_SHARED_SECRET];
     uint8_t ss2[TEMPO_LEN_SHARED_SECRET];
     ret = mlk_kem_dec(key, ct, sk);
     if (ret != 0)
     {
         goto cleanup;
     }
-    h_confirm(tag2, ss1, sid, pwd, pk, apk, ct, key);
-    if (mlk_randombytes(ss2, TEMPO_LEN_SHARED_SECRET) != 0)
+    if (mlk_randombytes(ss, TEMPO_LEN_SHARED_SECRET) != 0)
     {
         ret = MLK_ERR_RNG_FAIL;
         goto cleanup;
     }
-    uint8_t ok = mlk_ct_memcmp(tag, tag2, TEMPO_LEN_TAG) == 0;
-    mlk_ct_cmov_zero(ss, ss1, TEMPO_LEN_SHARED_SECRET, !ok);
-    mlk_ct_cmov_zero(ss, ss2, TEMPO_LEN_SHARED_SECRET, ok);
+    ret = h_confirm(tag2, ss2, sid, pwd, pk, apk, ct, key);
+    if (ret != 0)
+    {
+        goto cleanup;
+    }
+    mlk_ct_cmov_zero(
+        ss,
+        ss2,
+        TEMPO_LEN_SHARED_SECRET,
+        mlk_ct_memcmp(tag, tag2, TEMPO_LEN_TAG) != 0);
 cleanup:
     mlk_zeroize(key, MLKEM_SSBYTES);
     mlk_zeroize(tag2, TEMPO_LEN_TAG);
-    mlk_zeroize(ss1, TEMPO_LEN_SHARED_SECRET);
     mlk_zeroize(ss2, TEMPO_LEN_SHARED_SECRET);
     return ret;
 }
 
+#ifdef MLK_CONFIG_USE_OPENSSL
+#undef md_ctx
+#undef md_shake128
+#undef md_shake256
+#undef md_sha256
+#undef md_sha512
+#undef md_init
+#undef digest
+#undef shake128
+#undef shake256
+#undef sha256
+#undef sha512
+#endif
 #undef h_fls
 #undef h_1
 #undef h_2

@@ -179,6 +179,7 @@
 #define MLK_CONFIG_TEST
 #define MLK_CONFIG_PERF
 #define MLK_CONFIG_TEMPO_FLS185
+#define MLK_CONFIG_FORCE_GETRANDOM
 
 /******************************************************************************
  *

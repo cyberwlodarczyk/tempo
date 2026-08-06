@@ -183,6 +183,7 @@
 #undef MLK_CONFIG_API_QUALIFIER
 #undef MLK_ERR_FAIL
 #undef MLK_ERR_RNG_FAIL
+#undef MLK_ERR_DIGEST_FAIL
 #undef MLK_H
 #undef MLK_MAX3_
 #undef MLK_TOTAL_ALLOC_1024
@@ -222,6 +223,7 @@
 #undef MLK_EMPTY_CU
 #undef MLK_ERR_FAIL
 #undef MLK_ERR_RNG_FAIL
+#undef MLK_ERR_DIGEST_FAIL
 #undef MLK_EXTERNAL_API
 #undef MLK_FIPS202X4_HEADER_FILE
 #undef MLK_FIPS202_HEADER_FILE
@@ -340,7 +342,6 @@
 #undef mlk_polyvec_tomont
 /* mlkem/src/tempo.h */
 #undef MLK_TEMPO_H
-#undef MLK_TEMPO_FLS_RETURN
 #undef mlk_tempo_gen_vector
 #undef mlk_tempo_gen_matrix
 #undef mlk_tempo_keygen
@@ -443,6 +444,7 @@
 #undef MLK_SYS_WINDOWS
 #undef MLK_SYS_X86_64
 #undef MLK_SYS_X86_64_AVX2
+#undef MLK_SYS_X86_64_AVX512
 /* mlkem/src/verify.h */
 #undef MLK_USE_ASM_VALUE_BARRIER
 #undef MLK_VERIFY_H

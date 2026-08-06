@@ -5,22 +5,16 @@
 #include "poly_k.h"
 
 #if defined(MLK_CONFIG_TEST) || defined(MLK_CONFIG_PERF)
-#ifdef MLK_CONFIG_TEMPO_FLS185
-#define MLK_TEMPO_FLS_RETURN int
-#else
-#define MLK_TEMPO_FLS_RETURN void
-#endif
-
 #define mlk_tempo_gen_vector MLK_TEMPO_NAMESPACE_K(gen_vector)
 MLK_INTERNAL_API
-MLK_TEMPO_FLS_RETURN mlk_tempo_gen_vector(
+int mlk_tempo_gen_vector(
     mlk_polyvec *a,
     uint8_t seed[MLKEM_SYMBYTES],
     int transposed);
 
 #define mlk_tempo_gen_matrix MLK_TEMPO_NAMESPACE_K(gen_matrix)
 MLK_INTERNAL_API
-MLK_TEMPO_FLS_RETURN mlk_tempo_gen_matrix(
+int mlk_tempo_gen_matrix(
     mlk_polymat *a,
     uint8_t seed[MLKEM_SYMBYTES],
     int transposed);

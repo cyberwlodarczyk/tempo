@@ -4,8 +4,8 @@
 .PHONY: all build test perf clean
 .DEFAULT_GOAL := all
 
-CC  ?= gcc
-AR  ?= ar
+CC ?= gcc
+AR ?= ar
 
 # Adjust CFLAGS if needed
 CFLAGS := \
@@ -23,6 +23,7 @@ CFLAGS := \
 	-Wno-long-long \
 	-Wno-unknown-pragmas \
 	-Wno-unused-command-line-argument \
+	-Wno-unused-label \
 	-O3 \
 	-std=c99 \
 	-pedantic \
@@ -34,6 +35,12 @@ CFLAGS := \
 # mlkem-native's tests, but you can write your own or specialize accordingly.
 AUTO ?= 1
 include auto.mk
+
+OPENSSL ?= 1
+ifeq ($(OPENSSL),1)
+CFLAGS += -DMLK_CONFIG_USE_OPENSSL
+LIB = -lcrypto
+endif
 
 # The following only concerns the cross-compilation tests.
 # You can likely ignore the following for your application.
@@ -74,18 +81,18 @@ MLK_SOURCE_ASM = mlkem/mlkem.S
 # Your application source code
 # APP_SOURCE=main.c
 
-BUILD_DIR=build
-BIN_DIR=bin
-BIN_TEST=$(BIN_DIR)/test
-BIN_PERF=$(BIN_DIR)/perf
+BUILD_DIR = build
+BIN_DIR = bin
+BIN_TEST = $(BIN_DIR)/test
+BIN_PERF = $(BIN_DIR)/perf
 
 #
 # Configuration adjustments
 #
 ASMFLAGS = -DMLK_CONFIG_MULTILEVEL_WITH_SHARED
 
-MLK_OBJ_C=$(patsubst %,$(BUILD_DIR)/%.o,$(MLK_SOURCE_C))
-MLK_OBJ_ASM=$(patsubst %,$(BUILD_DIR)/%.o,$(MLK_SOURCE_ASM))
+MLK_OBJ_C = $(patsubst %,$(BUILD_DIR)/%.o,$(MLK_SOURCE_C))
+MLK_OBJ_ASM = $(patsubst %,$(BUILD_DIR)/%.o,$(MLK_SOURCE_ASM))
 
 Q ?= @
 
@@ -102,7 +109,7 @@ $(BUILD_DIR)/%.S.o: %.S
 $(BIN_DIR)/%: %.c $(MLK_OBJ_C) $(MLK_OBJ_ASM)
 	$(Q)echo "CC  $@"
 	$(Q)[ -d $(@D) ] || mkdir -p $(@D)
-	$(Q)$(CC) -Wall -I. $^ -o $@ -lcrypto
+	$(Q)$(CC) $(CFLAGS) $(LDFLAGS) -I. $^ -o $@ $(LIB)
 	$(Q)strip -S $@
 
 all: build

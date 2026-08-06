@@ -1,11 +1,14 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#ifdef MLK_CONFIG_USE_OPENSSL
+#include <openssl/opensslv.h>
+#endif
 #include "mlkem/mlkem.h"
 
 #define RUNS 10000
 
-void perf_run(const char *name, uint64_t f())
+static void perf_run(const char *name, uint64_t f())
 {
     printf("%s: ", name);
     fflush(stdout);
@@ -26,6 +29,10 @@ void perf_run(const char *name, uint64_t f())
 
 int main()
 {
+#ifdef MLK_CONFIG_USE_OPENSSL
+    printf("%s\n", OPENSSL_VERSION_TEXT);
+#endif
+    printf("N = %d\n", RUNS);
     perf_run("randombytes_32", mlkem_perf_randombytes_32);
     perf_run("mlkem512_polyvec_sub", mlkem512_perf_polyvec_sub);
     perf_run("mlkem512_polyvec_sub_mask", mlkem512_perf_polyvec_sub_mask);

@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef MLK_CONFIG_USE_OPENSSL
+#include <openssl/opensslv.h>
+#endif
 #include "mlkem/mlkem.h"
 
 #define RUNS 10000
 
-int test_run(const char *name, int f())
+static int test_run(const char *name, int f())
 {
     printf("%s: ", name);
     fflush(stdout);
@@ -18,7 +21,7 @@ int test_run(const char *name, int f())
     }
     if (fail == 0)
     {
-        printf("ok (%d/%d)\n", RUNS, RUNS);
+        printf("ok\n");
         return 0;
     }
     else
@@ -30,6 +33,10 @@ int test_run(const char *name, int f())
 
 int main()
 {
+#ifdef MLK_CONFIG_USE_OPENSSL
+    printf("%s\n", OPENSSL_VERSION_TEXT);
+#endif
+    printf("N = %d\n", RUNS);
     int ok = 1;
     ok = test_run("mlkem512_exchange", mlkem512_test_exchange) == 0 && ok;
     ok = test_run("mlkem768_exchange", mlkem768_test_exchange) == 0 && ok;
