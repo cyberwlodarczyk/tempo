@@ -222,7 +222,7 @@ void mlk_gen_vector(
     const uint8_t seed[MLKEM_SYMBYTES],
     int transposed)
 {
-#if !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY)
+#if !defined(MLK_CONFIG_SERIAL_FIPS202_ONLY) && defined(MLK_USE_NATIVE_REJ_UNIFORM)
     MLK_ALIGN uint8_t seed_ext[4][MLK_ALIGN_UP(MLKEM_SYMBYTES + 2)];
     for (uint8_t x = 0; x < 4; x++)
     {
