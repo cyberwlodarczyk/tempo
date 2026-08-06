@@ -6,14 +6,15 @@
 #endif
 #include "mlkem/mlkem.h"
 
-#define RUNS 10000
+#define WARMUP_RUNS 1000
+#define RUNS 100000
 
 static void perf_run(const char *name, uint64_t f())
 {
     printf("%s: ", name);
     fflush(stdout);
     uint64_t total = 0;
-    for (int i = 0; i < RUNS; i++)
+    for (int i = 0; i < WARMUP_RUNS + RUNS; i++)
     {
         uint64_t ns = f();
         if (ns == 0)
@@ -21,7 +22,10 @@ static void perf_run(const char *name, uint64_t f())
             printf("fail\n");
             return;
         }
-        total += ns;
+        if (i >= WARMUP_RUNS)
+        {
+            total += ns;
+        }
     }
     uint64_t avg = total / RUNS;
     printf("%.2fµs\n", (double)avg / 1000);
@@ -32,24 +36,19 @@ int main()
 #ifdef MLK_CONFIG_USE_OPENSSL
     printf("%s\n", OPENSSL_VERSION_TEXT);
 #endif
-    printf("N = %d\n", RUNS);
-    perf_run("randombytes_32", mlkem_perf_randombytes_32);
-    perf_run("mlkem512_polyvec_sub", mlkem512_perf_polyvec_sub);
-    perf_run("mlkem512_polyvec_sub_mask", mlkem512_perf_polyvec_sub_mask);
+    printf("N warmup = %d\n", WARMUP_RUNS);
+    printf("N        = %d\n", RUNS);
+    perf_run("rand_32_bytes", mlkem_perf_rand_32_bytes);
     perf_run("mlkem512_gen_vector", mlkem512_perf_gen_vector);
     perf_run("mlkem512_gen_matrix", mlkem512_perf_gen_matrix);
     perf_run("mlkem512_keypair", mlkem512_perf_keypair);
     perf_run("mlkem512_enc", mlkem512_perf_enc);
     perf_run("mlkem512_dec", mlkem512_perf_dec);
-    perf_run("mlkem768_polyvec_sub", mlkem768_perf_polyvec_sub);
-    perf_run("mlkem768_polyvec_sub_mask", mlkem768_perf_polyvec_sub_mask);
     perf_run("mlkem768_gen_vector", mlkem768_perf_gen_vector);
     perf_run("mlkem768_gen_matrix", mlkem768_perf_gen_matrix);
     perf_run("mlkem768_keypair", mlkem768_perf_keypair);
     perf_run("mlkem768_enc", mlkem768_perf_enc);
     perf_run("mlkem768_dec", mlkem768_perf_dec);
-    perf_run("mlkem1024_polyvec_sub", mlkem1024_perf_polyvec_sub);
-    perf_run("mlkem1024_polyvec_sub_mask", mlkem1024_perf_polyvec_sub_mask);
     perf_run("mlkem1024_gen_vector", mlkem1024_perf_gen_vector);
     perf_run("mlkem1024_gen_matrix", mlkem1024_perf_gen_matrix);
     perf_run("mlkem1024_keypair", mlkem1024_perf_keypair);

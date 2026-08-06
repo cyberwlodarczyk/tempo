@@ -4,18 +4,10 @@
 #include "common.h"
 
 #ifdef MLK_CONFIG_MULTILEVEL_WITH_SHARED
-#define mlk_perf_randombytes_32 MLK_NAMESPACE(perf_randombytes_32)
+#define mlk_perf_rand_32_bytes MLK_NAMESPACE(perf_rand_32_bytes)
 MLK_EXTERNAL_API
-uint64_t mlk_perf_randombytes_32(void);
+uint64_t mlk_perf_rand_32_bytes(void);
 #endif
-
-#define mlk_perf_polyvec_sub MLK_NAMESPACE_K(perf_polyvec_sub)
-MLK_EXTERNAL_API
-uint64_t mlk_perf_polyvec_sub(void);
-
-#define mlk_perf_polyvec_sub_mask MLK_NAMESPACE_K(perf_polyvec_sub_mask)
-MLK_EXTERNAL_API
-uint64_t mlk_perf_polyvec_sub_mask(void);
 
 #define mlk_perf_gen_vector MLK_NAMESPACE_K(perf_gen_vector)
 MLK_EXTERNAL_API

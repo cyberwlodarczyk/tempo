@@ -476,7 +476,7 @@ void mlk_polyvec_add(mlk_polyvec *r, const mlk_polyvec *b)
                                                                                                                                                                                                                                  (int32_t)r->vec[j1].coeffs[k1] + b->vec[j1].coeffs[k1] >= INT16_MIN)))
             assigns(memory_slice(r, sizeof(mlk_polyvec))));
 
-#if !defined(MLK_CONFIG_TEMPO_FLS185) || defined(MLK_CONFIG_PERF)
+#if !defined(MLK_CONFIG_TEMPO_FLS185)
 #define mlk_polyvec_sub MLK_NAMESPACE_K(polyvec_sub)
 MLK_INTERNAL_API
 void mlk_polyvec_sub(mlk_polyvec *r, const mlk_polyvec *b)
@@ -489,7 +489,7 @@ void mlk_polyvec_sub(mlk_polyvec *r, const mlk_polyvec *b)
             assigns(memory_slice(r, sizeof(mlk_polyvec))));
 #endif
 
-#if defined(MLK_CONFIG_TEMPO_FLS185) || defined(MLK_CONFIG_PERF)
+#if defined(MLK_CONFIG_TEMPO_FLS185)
 #define mlk_polyvec_sub_mask MLK_NAMESPACE_K(polyvec_sub_mask)
 MLK_INTERNAL_API
 void mlk_polyvec_sub_mask(

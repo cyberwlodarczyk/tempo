@@ -275,7 +275,7 @@ void mlk_polyvec_add(mlk_polyvec *r, const mlk_polyvec *b)
     }
 }
 
-#if !defined(MLK_CONFIG_TEMPO_FLS185) || defined(MLK_CONFIG_PERF)
+#if !defined(MLK_CONFIG_TEMPO_FLS185)
 MLK_INTERNAL_API
 void mlk_polyvec_sub(mlk_polyvec *r, const mlk_polyvec *b)
 {
@@ -299,7 +299,7 @@ void mlk_polyvec_sub(mlk_polyvec *r, const mlk_polyvec *b)
 }
 #endif
 
-#if defined(MLK_CONFIG_TEMPO_FLS185) || defined(MLK_CONFIG_PERF)
+#if defined(MLK_CONFIG_TEMPO_FLS185)
 MLK_INTERNAL_API
 void mlk_polyvec_sub_mask(
     mlk_polyvec *r,

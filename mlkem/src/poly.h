@@ -242,7 +242,7 @@ void mlk_poly_sub(mlk_poly *r, const mlk_poly *b)
             ensures(forall(k, 0, MLKEM_N, r->coeffs[k] == old(*r).coeffs[k] - b->coeffs[k]))
                 assigns(memory_slice(r, sizeof(mlk_poly))));
 
-#if defined(MLK_CONFIG_TEMPO_FLS185) || defined(MLK_CONFIG_PERF)
+#if defined(MLK_CONFIG_TEMPO_FLS185)
 #define mlk_poly_sub_mask MLK_NAMESPACE(poly_sub_mask)
 MLK_INTERNAL_API
 void mlk_poly_sub_mask(

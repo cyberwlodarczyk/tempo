@@ -18,7 +18,7 @@ static uint64_t time_ns()
 
 #ifdef MLK_CONFIG_MULTILEVEL_WITH_SHARED
 MLK_EXTERNAL_API
-uint64_t mlk_perf_randombytes_32(void)
+uint64_t mlk_perf_rand_32_bytes(void)
 {
     uint8_t seed[32];
     uint64_t start = time_ns();
@@ -29,57 +29,6 @@ uint64_t mlk_perf_randombytes_32(void)
     return time_ns() - start;
 }
 #endif
-
-MLK_EXTERNAL_API
-uint64_t mlk_perf_polyvec_sub(void)
-{
-    uint8_t seed1[MLKEM_SYMBYTES];
-    if (mlk_randombytes(seed1, MLKEM_SYMBYTES) != 0)
-    {
-        return 0;
-    }
-    mlk_polyvec v1;
-    mlk_gen_vector(&v1, seed1, 0);
-    uint8_t seed2[MLKEM_SYMBYTES];
-    if (mlk_randombytes(seed2, MLKEM_SYMBYTES) != 0)
-    {
-        return 0;
-    }
-    mlk_polyvec v2;
-    mlk_gen_vector(&v2, seed1, 0);
-    uint64_t start = time_ns();
-    mlk_polyvec_sub(&v1, &v2);
-    return time_ns() - start;
-}
-
-MLK_EXTERNAL_API
-uint64_t mlk_perf_polyvec_sub_mask(void)
-{
-    uint8_t seed1[MLKEM_SYMBYTES];
-    if (mlk_randombytes(seed1, MLKEM_SYMBYTES) != 0)
-    {
-        return 0;
-    }
-    mlk_polyvec v1;
-    mlk_gen_vector(&v1, seed1, 0);
-    uint8_t seed2[MLKEM_SYMBYTES];
-    if (mlk_randombytes(seed2, MLKEM_SYMBYTES) != 0)
-    {
-        return 0;
-    }
-    mlk_polyvec v2;
-    mlk_gen_vector(&v2, seed1, 0);
-    uint8_t seed3[MLKEM_SYMBYTES];
-    if (mlk_randombytes(seed3, MLKEM_SYMBYTES) != 0)
-    {
-        return 0;
-    }
-    mlk_polyvec v3;
-    mlk_gen_vector(&v3, seed1, 0);
-    uint64_t start = time_ns();
-    mlk_polyvec_sub_mask(&v1, &v2, &v3, 0);
-    return time_ns() - start;
-}
 
 MLK_EXTERNAL_API
 uint64_t mlk_perf_gen_vector(void)

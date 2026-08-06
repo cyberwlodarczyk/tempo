@@ -5,7 +5,7 @@
 #endif
 #include "mlkem/mlkem.h"
 
-#define RUNS 10000
+#define RUNS 100000
 
 static int test_run(const char *name, int f())
 {

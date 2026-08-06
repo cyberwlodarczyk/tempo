@@ -289,9 +289,7 @@
 #undef MLK_PARAMS_H
 /* mlkem/src/perf.h */
 #undef MLK_PERF_H
-#undef mlk_perf_randombytes_32
-#undef mlk_perf_polyvec_sub
-#undef mlk_perf_polyvec_sub_mask
+#undef mlk_perf_rand_32_bytes
 #undef mlk_perf_gen_vector
 #undef mlk_perf_gen_matrix
 #undef mlk_perf_keypair

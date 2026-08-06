@@ -20,10 +20,6 @@
 #include "common.h"
 #if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED)
 
-#ifdef MLK_SYS_X86_64_AVX512
-#include <immintrin.h>
-#endif
-
 #include "cbmc.h"
 #include "debug.h"
 #include "poly.h"
@@ -254,18 +250,6 @@ void mlk_poly_add(mlk_poly *r, const mlk_poly *b)
 MLK_INTERNAL_API
 void mlk_poly_sub(mlk_poly *r, const mlk_poly *b)
 {
-#ifdef MLK_SYS_X86_64_AVX512
-  __m512i rv, bv;
-  uint8_t *rb = (uint8_t *)r->coeffs;
-  uint8_t *bb = (uint8_t *)b->coeffs;
-  for (int i = 0; i < 8; i++, rb += 64, bb += 64)
-  {
-    rv = _mm512_load_si512(rb);
-    bv = _mm512_load_si512(bb);
-    rv = _mm512_sub_epi16(rv, bv);
-    _mm512_store_si512(rb, rv);
-  }
-#else
   unsigned i;
   for (i = 0; i < MLKEM_N; i++)
     __loop__(
@@ -277,33 +261,16 @@ void mlk_poly_sub(mlk_poly *r, const mlk_poly *b)
       /* The preconditions imply that the subtraction stays within int16_t. */
       r->coeffs[i] = (int16_t)(r->coeffs[i] - b->coeffs[i]);
     }
-#endif
 }
 
-#if defined(MLK_CONFIG_TEMPO_FLS185) || defined(MLK_CONFIG_PERF)
+#if defined(MLK_CONFIG_TEMPO_FLS185)
 MLK_INTERNAL_API
 void mlk_poly_sub_mask(mlk_poly *r, const mlk_poly *a, const mlk_poly *b, int mask)
 {
-#ifdef MLK_SYS_X86_64_AVX512
-  __m512i rv, av, bv;
-  uint8_t *rb = (uint8_t *)r->coeffs;
-  uint8_t *ab = (uint8_t *)a->coeffs;
-  uint8_t *bb = (uint8_t *)b->coeffs;
-  for (int i = 0; i < 8; i++, rb += 64, ab += 64, bb += 64)
-  {
-    rv = _mm512_load_si512(rb);
-    av = _mm512_load_si512(ab);
-    bv = _mm512_load_si512(bb);
-    bv = _mm512_mask_blend_epi16((__mmask32)-mask, av, bv);
-    rv = _mm512_sub_epi16(rv, bv);
-    _mm512_store_si512(rb, rv);
-  }
-#else
   for (int i = 0; i < MLKEM_N; i++)
   {
-    r->coeffs[i] = (int16_t)(r->coeffs[i] - (mask * b->coeffs[i] + (1 - mask) * a->coeffs[i]));
+    r->coeffs[i] -= mlk_ct_sel_int16(b->coeffs[i], a->coeffs[i], (uint16_t)mask);
   }
-#endif
 }
 #endif
 
